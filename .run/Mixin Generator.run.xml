@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Mixin Generator" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="jbr-25" />
+    <option name="ALTERNATIVE_JRE_PATH" value="26" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="fr.geming400.screwyou4.generator.GeneratorEntrypoint" />
     <module name="screw-you-4.main" />
