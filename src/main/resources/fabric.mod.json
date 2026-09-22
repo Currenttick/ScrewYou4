@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"main": [
 			"fr.geming400.screwyou4.ScrewYou4"
+		],
+		"preLaunch": [
+			"fr.geming400.screwyou4.killer.ClassExecutioner"
 		]
 	},
 	"mixins": [
