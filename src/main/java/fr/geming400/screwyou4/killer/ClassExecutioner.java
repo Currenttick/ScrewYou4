@@ -5,12 +5,14 @@ import net.minecraft.util.RandomSource;
 import org.spongepowered.tools.agent.MixinAgent;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 public class ClassExecutioner implements PreLaunchEntrypoint {
 
     private static Class<?> agentClass;
+    private static ClassJudger classJudger;
 
     public static Object getAgents() {
         try {
@@ -23,15 +25,29 @@ public class ClassExecutioner implements PreLaunchEntrypoint {
     }
 
     public static String kill(RandomSource random) {
-        try {
-            Class<?>[] classes = ((Instrumentation) agentClass.getDeclaredMethod("getInstrumentationOrThrow").invoke(null)).getAllLoadedClasses();
+        checkClassDecoderPresent();
+        Instrumentation inst = classJudger.getInstrumentation();
+        Class<?> toKill;
+        do {
+            Class<?>[] classes = inst.getAllLoadedClasses();
             int classNumber = classes.length;
-            Class<?> toKill = classes[random.nextInt(0, classNumber - 1)];
-            return toKill.getName();
-        } catch (IllegalAccessException | NoSuchMethodException |
-                 InvocationTargetException e) {
-            throw new RuntimeException(e);
+            toKill = classes[random.nextInt(0, classNumber - 1)];
+        } while (!tryRetransform(random, toKill, inst));
+        return toKill.getName();
+    }
+
+    /**
+     * @return whether it was successful
+     */
+    private static boolean tryRetransform(RandomSource random, Class<?> toKill, Instrumentation inst) {
+        try {
+            classJudger.addToKill(toKill);
+            inst.retransformClasses(toKill);
+        } catch (UnmodifiableClassException e) {
+            classJudger.cancel(toKill);
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -41,6 +57,16 @@ public class ClassExecutioner implements PreLaunchEntrypoint {
             agentClass.getDeclaredMethod("launch").invoke(null);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void checkClassDecoderPresent() {
+        if (classJudger == null) {
+            try {
+                classJudger = new ClassJudger(((Instrumentation) agentClass.getDeclaredMethod("getInstrumentationOrThrow").invoke(null)));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

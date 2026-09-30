@@ -5,14 +5,12 @@ import fr.geming400.screwyou4.killer.AgentLauncher;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.util.LoaderUtil;
-import net.minecraft.util.RandomSource;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -26,6 +24,9 @@ public class Agent {
     public static void agentmain(String agentArgs, Instrumentation inst) {
         INSTRUMENTATION = inst;
         ScrewYou4.LOGGER.info("Agent initialized!");
+        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
+            throw new RuntimeException(e);
+        });
     }
 
     public static Instrumentation getInstrumentationOrThrow() {

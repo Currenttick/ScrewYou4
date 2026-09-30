@@ -6,6 +6,8 @@ import org.objectweb.asm.Type;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Utils {
@@ -76,5 +78,35 @@ public class Utils {
         } else {
             return !Modifier.isPublic(clazz.getModifiers()) || isPrivateOrHasPrivateEnclosingClass(clazz.getEnclosingClass());
         }
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2, K k3, V v3) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        return map;
     }
 }
