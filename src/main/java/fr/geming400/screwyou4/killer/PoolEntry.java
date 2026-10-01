@@ -3,7 +3,8 @@ package fr.geming400.screwyou4.killer;
 import fr.geming400.screwyou4.Utils;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class PoolEntry {
@@ -33,6 +34,12 @@ public abstract class PoolEntry {
     protected final Map<String, Field<?>> fields;
     private PoolEntry(ByteBuffer ignoredBuffer, Map<String, Field<?>> fields) {
         this.fields = fields;
+    }
+
+    public void encode(ByteBuffer buffer) {
+        for (Field<?> field : this.fields.values()) {
+            field.encode(buffer);
+        }
     }
     
     public final String getName() {

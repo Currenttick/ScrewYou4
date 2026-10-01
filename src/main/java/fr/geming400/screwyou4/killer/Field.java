@@ -1,18 +1,17 @@
 package fr.geming400.screwyou4.killer;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
-public interface Field<N extends Number> {
+public interface Field<N extends Number> extends ClassWriteable {
+
     N getValue();
-
-    void encode(ByteBuffer buffer);
 
     abstract class AbstractField<N extends Number> implements Field<N> {
 
         protected N value;
 
-        public AbstractField(ByteBuffer ignoredBuffer) {
-        }
+        public AbstractField(ByteBuffer ignoredBuffer) {}
 
         @Override
         public N getValue() {
@@ -33,6 +32,117 @@ public interface Field<N extends Number> {
         }
     }
 
+    abstract class ArrayField<F extends ClassWriteable> implements Field<Integer> {
+
+        protected final ArrayList<F> value = new ArrayList<>();
+
+        public ArrayField(ByteBuffer ignoredBuffer) {}
+
+        public F getField(short index) {
+            return this.value.get(index);
+        }
+
+        @Override
+        public void encode(ByteBuffer buffer) {
+            this.encodeHeader(buffer);
+            for (F field : this.value) {
+                field.encode(buffer);
+            }
+        }
+
+        protected void encodeHeader(ByteBuffer buffer) {
+            buffer.putShort((short) this.value.size());
+        }
+
+        @Override
+        public Integer getValue() {
+            return this.size();
+        }
+
+        @Override
+        public int size() {
+            return 2 + this.value.stream().mapToInt(F::size).sum();
+        }
+
+        @Override
+        public String toString() {
+            return this.value.size() + this.value.toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this.getClass().isInstance(obj)) {
+                return this.value.equals(this.getClass().cast(obj).value);
+            }
+            return false;
+        }
+    }
+
+    class BigByteArrayField extends ArrayField<ByteField> {
+
+        public BigByteArrayField(ByteBuffer buffer) {
+            super(buffer);
+            int size = buffer.getShort();
+            for (int i = 0; i < size; i++) {
+                this.value.add(new ByteField(buffer));
+            }
+        }
+
+        @Override
+        protected void encodeHeader(ByteBuffer buffer) {
+            buffer.putInt(this.value.size());
+        }
+
+        @Override
+        public int size() {
+            return 2 + this.value.size();
+        }
+    }
+
+    class ShortArrayField extends ArrayField<ShortField> {
+
+        public ShortArrayField(ByteBuffer buffer) {
+            super(buffer);
+            short size = buffer.getShort();
+            for (short i = 0; i < size; i++) {
+                this.value.add(new ShortField(buffer));
+            }
+        }
+    }
+
+    class AttributeArrayField extends ArrayField<AttributeInfo> {
+
+        public AttributeArrayField(ByteBuffer buffer, ArrayList<PoolEntry> poolEntries) {
+            super(buffer);
+            short size = buffer.getShort();
+            for (short i = 0; i < size; i++) {
+                this.value.add(new AttributeInfo(buffer, poolEntries));
+            }
+        }
+    }
+
+    class FieldArrayField extends ArrayField<FieldInfo> {
+
+        public FieldArrayField(ByteBuffer buffer, ArrayList<PoolEntry> poolEntries) {
+            super(buffer);
+            short size = buffer.getShort();
+            for (short i = 0; i < size; i++) {
+                this.value.add(new FieldInfo(buffer, poolEntries));
+            }
+        }
+    }
+
+    class MethodArrayField extends ArrayField<MethodInfo> {
+
+        public MethodArrayField(ByteBuffer buffer, ArrayList<PoolEntry> poolEntries) {
+            super(buffer);
+            short size = buffer.getShort();
+            for (short i = 0; i < size; i++) {
+                this.value.add(new MethodInfo(buffer, poolEntries));
+            }
+        }
+    }
+
     class Utf8Field extends AbstractField<Short> {
         protected String utf8;
 
@@ -48,6 +158,11 @@ public interface Field<N extends Number> {
         public void encode(ByteBuffer buffer) {
             buffer.putShort(this.value);
             buffer.put(this.utf8.getBytes());
+        }
+
+        @Override
+        public int size() {
+            return 2 + this.value;
         }
 
         @Override
@@ -75,6 +190,11 @@ public interface Field<N extends Number> {
         public void encode(ByteBuffer buffer) {
             buffer.putInt(this.value);
         }
+
+        @Override
+        public int size() {
+            return 4;
+        }
     }
 
     class ShortField extends AbstractField<Short> {
@@ -87,6 +207,11 @@ public interface Field<N extends Number> {
         public void encode(ByteBuffer buffer) {
             buffer.putShort(this.value);
         }
+
+        @Override
+        public int size() {
+            return 2;
+        }
     }
 
     class ByteField extends AbstractField<Byte> {
@@ -98,6 +223,11 @@ public interface Field<N extends Number> {
         @Override
         public void encode(ByteBuffer buffer) {
             buffer.put(this.value);
+        }
+
+        @Override
+        public int size() {
+            return 1;
         }
     }
 
@@ -112,6 +242,11 @@ public interface Field<N extends Number> {
         public void encode(ByteBuffer buffer) {
             buffer.putLong(this.value);
         }
+
+        @Override
+        public int size() {
+            return 8;
+        }
     }
 
     class FloatField extends AbstractField<Float> {
@@ -124,6 +259,11 @@ public interface Field<N extends Number> {
         public void encode(ByteBuffer buffer) {
             buffer.putFloat(this.value);
         }
+
+        @Override
+        public int size() {
+            return 4;
+        }
     }
 
     class DoubleField extends AbstractField<Double> {
@@ -135,6 +275,11 @@ public interface Field<N extends Number> {
         @Override
         public void encode(ByteBuffer buffer) {
             buffer.putDouble(this.value);
+        }
+
+        @Override
+        public int size() {
+            return 8;
         }
     }
 }

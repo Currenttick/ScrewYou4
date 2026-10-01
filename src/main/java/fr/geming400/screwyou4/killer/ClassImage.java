@@ -14,10 +14,10 @@ public class ClassImage {
     private final short accessFlags;
     private final short thisClass;
     private final short superClass;
-    private final ArrayList<Short> interfaces;
-    private final ArrayList<FieldInfo> fields;
-    private final ArrayList<MethodInfo> methods;
-    private final ArrayList<AttributeInfo> attributes;
+    private final Field.ShortArrayField interfaces;
+    private final Field.FieldArrayField fields;
+    private final Field.MethodArrayField methods;
+    private final Field.AttributeArrayField attributes;
 
     public ClassImage(byte[] data) {
         this.data = ByteBuffer.wrap(data);
@@ -53,29 +53,13 @@ public class ClassImage {
         log("this class : " + this.poolEntries.get(this.thisClass).format(this.poolEntries));
         this.superClass = this.data.getShort();
         log("super class : " + this.poolEntries.get(this.superClass).format(this.poolEntries));
-        short interfaceCount = this.data.getShort();
-        this.interfaces = new ArrayList<>(interfaceCount);
-        for (int i = 0; i < interfaceCount; i++) {
-            this.interfaces.add(this.data.getShort());
-        }
-        log("interfaces size : " + this.interfaces.size() + this.interfaces.stream().map(i -> this.poolEntries.get(i).format(this.poolEntries)).toList());
-        short fieldCount = this.data.getShort();
-        this.fields = new ArrayList<>(fieldCount);
-        for (int i = 0; i < fieldCount; i++) {
-            this.fields.add(new FieldInfo(this.data, this.poolEntries));
-        }
-        log("fields size : " + this.fields.size() + this.fields);
-        short methodCount = this.data.getShort();
-        this.methods = new ArrayList<>(methodCount);
-        for (int i = 0; i < methodCount; i++) {
-            this.methods.add(new MethodInfo(this.data, this.poolEntries));
-        }
-        log("methods size : " + this.methods.size() + this.methods);
-        short attributeCount = this.data.getShort();
-        this.attributes = new ArrayList<>(attributeCount);
-        for (int i = 0; i < attributeCount; i++) {
-            this.attributes.add(new AttributeInfo(this.data, this.poolEntries));
-        }
-        log("attributes size : " + this.attributes.size() + this.attributes);
+        this.interfaces = new Field.ShortArrayField(this.data);
+        log("interfaces size : " + this.interfaces);
+        this.fields = new Field.FieldArrayField(this.data, this.poolEntries);
+        log("fields size : " + this.fields);
+        this.methods = new Field.MethodArrayField(this.data, this.poolEntries);
+        log("methods size : " + this.methods);
+        this.attributes = new Field.AttributeArrayField(this.data, this.poolEntries);
+        log("attributes size : " + this.attributes);
     }
 }
