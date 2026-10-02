@@ -82,7 +82,7 @@ public interface Field<N extends Number> extends ClassWriteable {
 
         public BigByteArrayField(ByteBuffer buffer) {
             super(buffer);
-            int size = buffer.getShort();
+            int size = buffer.getInt();
             for (int i = 0; i < size; i++) {
                 this.value.add(new ByteField(buffer));
             }
