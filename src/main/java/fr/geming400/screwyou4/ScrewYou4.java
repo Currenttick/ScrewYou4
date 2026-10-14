@@ -24,7 +24,7 @@ public class ScrewYou4 implements ModInitializer {
 	public static final String MOD_ID = "screw-you-4";
 
 	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
+	// It is considered best practice to use your mod id as the logger's fieldName.
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
@@ -35,7 +35,6 @@ public class ScrewYou4 implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("Hello from the mod that will Screw You (4) !");
-		LOGGER.info(ClassExecutioner.getAgents().toString());
 
 		// FIXME
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
@@ -46,13 +45,13 @@ public class ScrewYou4 implements ModInitializer {
 		onLocalPlayerRespawn(player -> {
 			String killed_method = ClassExecutioner.kill(player.getRandom());
 
-			LOGGER.info("Killed method {} (CLIENT)", killed_method);
+			LOGGER.info("Killed method in class {} (CLIENT)", killed_method);
 		});
 
 		onDedicatedServerPlayerRespawn(player -> {
 			String killed_method = ClassExecutioner.kill(player.getRandom());
 
-			LOGGER.info("Killed method {} (DEDICATED SERVER)", killed_method);
+			LOGGER.info("Killed method in class {} (DEDICATED SERVER)", killed_method);
 		});
 	}
 

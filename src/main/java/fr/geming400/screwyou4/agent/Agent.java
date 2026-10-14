@@ -24,19 +24,19 @@ public class Agent {
     public static void agentmain(String agentArgs, Instrumentation inst) {
         INSTRUMENTATION = inst;
         ScrewYou4.LOGGER.info("Agent initialized!");
-        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
-            throw new RuntimeException(e);
-        });
     }
 
+    @SuppressWarnings("unused")
     public static Instrumentation getInstrumentationOrThrow() {
         return Objects.requireNonNull(INSTRUMENTATION);
     }
 
+    @SuppressWarnings("unused")
     public static Instrumentation getInstrumentation() {
         return INSTRUMENTATION;
     }
 
+    @SuppressWarnings("unused")
     public static Instrumentation waitForInstrumentation() {
         while (runningAgent != null) {
             Thread.onSpinWait();
@@ -44,6 +44,7 @@ public class Agent {
         return INSTRUMENTATION;
     }
 
+    @SuppressWarnings("unused")
     public static void launch() {
         long pid = ProcessHandle.current().pid();
         Class<AgentLauncher> clazz = AgentLauncher.class;
@@ -82,4 +83,9 @@ public class Agent {
         }).start();
     }
 
+    static {
+        if (!Agent.class.getClassLoader().equals(ClassLoader.getSystemClassLoader())) {
+            throw new RuntimeException("Agent not loaded from system classloader!");
+        }
+    }
 }
