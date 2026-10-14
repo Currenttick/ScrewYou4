@@ -2,7 +2,7 @@ package fr.geming400.screwyou4.killer.parser;
 
 import java.nio.ByteBuffer;
 
-public class ConstantPool {
+public class ConstantPool implements ClassWriteable {
 
     private final Field.ConstantPoolEntriesArray entries;
 
@@ -21,5 +21,20 @@ public class ConstantPool {
 
     public <P extends PoolEntry> P getExpected(int index) {
         return (P) this.entries.get(index);
+    }
+
+    @Override
+    public void write(ByteBuffer buffer) {
+        this.entries.write(buffer);
+    }
+
+    @Override
+    public String format(String name, ConstantPool constantPool) {
+        return "";
+    }
+
+    @Override
+    public int size() {
+        return this.entries.size();
     }
 }

@@ -11,6 +11,9 @@ import net.minecraft.util.RandomSource;
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,6 +60,21 @@ public class ClassJudger implements ClassFileTransformer {
                 ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
                 Infos.MethodInfo chosenMethod = infos.get(this.toKill.get(classBeingRedefined).nextInt(infos.size()));
                 ScrewYou4.LOGGER.info("Killed method {} (CLIENT)", chosenMethod.getName());
+                ByteBuffer buffer = ByteBuffer.allocate(image2.size());
+                image2.write(buffer);
+                if (VERBOSE) {
+                    Files.write(
+                            new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "original.class").toPath(),
+                            classfileBuffer,
+                            StandardOpenOption.CREATE
+                    );
+                    Files.write(
+                            new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "produced.class").toPath(),
+                            buffer.array(),
+                            StandardOpenOption.CREATE
+                    );
+                }
+                return buffer.array();
             } catch (Exception e) {
                 ScrewYou4.LOGGER.error("Failed to transform class : ", e);
                 assert Minecraft.getInstance().player != null;
