@@ -3,6 +3,7 @@ package fr.geming400.screwyou4.killer;
 import fr.geming400.screwyou4.ScrewYou4;
 import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
+import fr.geming400.screwyou4.killer.parser.MethodTerminator;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -11,7 +12,7 @@ import net.minecraft.util.RandomSource;
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.nio.ByteBuffer;
+import java.lang.instrument.UnmodifiableClassException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.ProtectionDomain;
@@ -20,7 +21,8 @@ import java.util.HashMap;
 
 public class ClassJudger implements ClassFileTransformer {
 
-    public static final boolean VERBOSE = true;
+    public static final boolean VERBOSE = false;
+    public static final boolean POST_MORTEM = true;
     public static FileOutputStream logFileStream = null;
 
     public static FileOutputStream getLogFileStream() {
@@ -54,15 +56,15 @@ public class ClassJudger implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (this.toKill.containsKey(classBeingRedefined)) {
+            final RandomSource random = this.toKill.remove(classBeingRedefined);
             try {
-//                ClassImage image = new ClassImage(classfileBuffer);
                 ClassRepresentation image2 = new ClassRepresentation(classfileBuffer);
                 ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
-                Infos.MethodInfo chosenMethod = infos.get(this.toKill.get(classBeingRedefined).nextInt(infos.size()));
-                ScrewYou4.LOGGER.info("Killed method {} (CLIENT)", chosenMethod.getName());
-                ByteBuffer buffer = ByteBuffer.allocate(image2.size());
-                image2.write(buffer);
-                if (VERBOSE) {
+                Infos.MethodInfo chosenMethod = infos.get(random.nextInt(infos.size()));
+                MethodTerminator terminator = new MethodTerminator(chosenMethod);
+                terminator.terminate();
+                byte[] buffer = image2.toByteArray();
+                if (POST_MORTEM) {
                     Files.write(
                             new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "original.class").toPath(),
                             classfileBuffer,
@@ -70,21 +72,22 @@ public class ClassJudger implements ClassFileTransformer {
                     );
                     Files.write(
                             new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "produced.class").toPath(),
-                            buffer.array(),
+                            buffer,
                             StandardOpenOption.CREATE
                     );
                 }
-                return buffer.array();
+                ScrewYou4.LOGGER.info("Killed method {} in {} (CLIENT)", chosenMethod.getName(), classBeingRedefined);
+                return buffer;
             } catch (Exception e) {
-                ScrewYou4.LOGGER.error("Failed to transform class : ", e);
-                assert Minecraft.getInstance().player != null;
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("Failed to transform class : " + e));
+                if (!(e instanceof UnsupportedOperationException && e.getMessage().contains("Method terminator"))) {
+                    ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
+                    assert Minecraft.getInstance().player != null;
+                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("Failed to transform class : " + e));
+                }
+                Thread.ofVirtual().start(() -> ClassExecutioner.kill(random));
             }
-            this.toKill.remove(classBeingRedefined);
-            return null;
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override
@@ -98,6 +101,10 @@ public class ClassJudger implements ClassFileTransformer {
 
     public void cancel(Class<?> clazz) {
         this.toKill.remove(clazz);
+    }
+
+    public void killClasses() throws UnmodifiableClassException {
+        this.inst.retransformClasses(this.toKill.keySet().toArray(new Class[0]));
     }
 
     public Instrumentation getInstrumentation() {

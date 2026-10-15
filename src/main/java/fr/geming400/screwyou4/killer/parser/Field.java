@@ -8,6 +8,10 @@ public interface Field<N> extends ClassWriteable {
 
     N getValue();
 
+    void override(N newValue);
+
+    void override(Field<N> field);
+
     abstract class AbstractField<N> implements Field<N> {
 
         protected N value;
@@ -20,6 +24,16 @@ public interface Field<N> extends ClassWriteable {
 
         public N getValue() {
             return this.value;
+        }
+
+        @Override
+        public void override(N newValue) {
+            this.value = newValue;
+        }
+
+        @Override
+        public void override(Field<N> field) {
+            this.value = field.getValue();
         }
 
         public String format(String fieldName, ConstantPool constantPool) {
@@ -39,6 +53,11 @@ public interface Field<N> extends ClassWriteable {
     }
 
     class ByteField extends AbstractField<Byte> {
+
+        public ByteField(byte b) {
+            super(null);
+            this.value = b;
+        }
 
         public ByteField(ByteBuffer buffer) {
             super(buffer);

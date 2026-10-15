@@ -44,14 +44,10 @@ public class ScrewYou4 implements ModInitializer {
 
 		onLocalPlayerRespawn(player -> {
 			String killed_method = ClassExecutioner.kill(player.getRandom());
-
-			LOGGER.info("Killed method in class {} (CLIENT)", killed_method);
 		});
 
 		onDedicatedServerPlayerRespawn(player -> {
 			String killed_method = ClassExecutioner.kill(player.getRandom());
-
-			LOGGER.info("Killed method in class {} (DEDICATED SERVER)", killed_method);
 		});
 	}
 

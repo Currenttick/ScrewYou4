@@ -6,7 +6,7 @@ public abstract class Infos implements ClassWriteable {
 
     public static class FieldInfo extends Field.FieldElement4<Field.ShortField, Field.ConstantPoolReferenceField, Field.ConstantPoolReferenceField, Field.ShortPrefixedArrayField<Attribute>> {
 
-        private final ConstantPool constantPool;
+        public final ConstantPool constantPool;
 
         public FieldInfo(ByteBuffer buffer, ConstantPool constantPool) {
             super(
@@ -46,7 +46,7 @@ public abstract class Infos implements ClassWriteable {
 
     public static class MethodInfo extends Field.FieldElement4<Field.ShortField, Field.ConstantPoolReferenceField, Field.ConstantPoolReferenceField, Field.ShortPrefixedArrayField<Attribute>> {
 
-        private final ConstantPool constantPool;
+        public final ConstantPool constantPool;
 
         public MethodInfo(ByteBuffer buffer, ConstantPool constantPool) {
             super(
@@ -81,6 +81,10 @@ public abstract class Infos implements ClassWriteable {
 
         public String getName() {
             return this.field2.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue() + this.field3.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue();
+        }
+
+        public String getDesc() {
+            return this.field3.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue();
         }
     }
 }

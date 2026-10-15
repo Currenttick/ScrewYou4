@@ -75,4 +75,10 @@ public class ClassRepresentation implements ClassWriteable {
     public int size() {
         return 14 + this.constantPool.size() + this.interfaces.size() + this.fields.size() + this.methods.size() + this.attributes.size();
     }
+
+    public byte[] toByteArray() {
+        ByteBuffer buffer = ByteBuffer.allocate(this.size());
+        this.write(buffer);
+        return buffer.array();
+    }
 }

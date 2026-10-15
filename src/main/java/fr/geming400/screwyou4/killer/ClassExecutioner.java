@@ -4,7 +4,6 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.util.RandomSource;
 
 import java.lang.instrument.Instrumentation;
-import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 
 public class ClassExecutioner implements PreLaunchEntrypoint {
@@ -32,8 +31,8 @@ public class ClassExecutioner implements PreLaunchEntrypoint {
                 return false; // Not supported for now...
             }
             classJudger.addToKill(toKill, random);
-            inst.retransformClasses(toKill);
-        } catch (UnmodifiableClassException e) {
+            classJudger.killClasses();
+        } catch (Exception e) {
             classJudger.cancel(toKill);
             return false;
         }
