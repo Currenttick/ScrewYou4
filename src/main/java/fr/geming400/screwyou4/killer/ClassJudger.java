@@ -6,7 +6,6 @@ import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.RandomSource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,7 +48,7 @@ public class ClassJudger implements ClassFileTransformer {
     }
 
     private final Instrumentation inst;
-    private final HashMap<Class<?>, RandomSource> toKill = new HashMap<>();
+    private final HashMap<Class<?>, Sentence> toKill = new HashMap<>();
 
     public ClassJudger(Instrumentation inst) {
         this.inst = inst;
@@ -59,12 +58,12 @@ public class ClassJudger implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (this.toKill.containsKey(classBeingRedefined)) {
-            final RandomSource random = this.toKill.remove(classBeingRedefined);
+            final Sentence sentence = this.toKill.remove(classBeingRedefined);
             try {
                 ClassRepresentation image2 = new ClassRepresentation(classfileBuffer);
                 ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
-                Infos.MethodInfo chosenMethod = infos.get(random.nextInt(infos.size()));
-                MethodTerminator terminator = new MethodTerminator(chosenMethod, random);
+                Infos.MethodInfo chosenMethod = infos.get(sentence.random().nextInt(infos.size()));
+                MethodTerminator terminator = new MethodTerminator(chosenMethod, sentence.random());
                 terminator.terminate();
                 byte[] buffer = image2.toByteArray();
                 if (POST_MORTEM) {
@@ -83,8 +82,8 @@ public class ClassJudger implements ClassFileTransformer {
                 return buffer;
             } catch (Exception e) {
                 // for some strange reason, you cannot re-transform classes from this thread
-                if (!(e instanceof IllegalStateException && (e.getMessage().contains("Rendersystem")))) {
-                    Thread.ofVirtual().start(() -> ClassExecutioner.kill(random));
+                if (!(e instanceof IllegalStateException && (e.getMessage().contains("Rendersystem"))) && sentence.shouldTryAnother()) {
+                    Thread.ofVirtual().start(() -> ClassExecutioner.kill(sentence));
                     if (
                             !(
                                     (e instanceof UnsupportedOperationException && e.getMessage().contains("Method terminator"))
@@ -95,6 +94,9 @@ public class ClassJudger implements ClassFileTransformer {
                         assert Minecraft.getInstance().player != null;
                         Utils.tellRaw("\"Failed to transform class : " + e + "\"");
                     }
+                } else if (!(e instanceof IllegalStateException && (e.getMessage().contains("Rendersystem")))) {
+                    assert Minecraft.getInstance().player != null;
+                    Utils.tellRaw("\"Failed to transform class : " + e + "\"");
                 }
             }
         }
@@ -106,17 +108,17 @@ public class ClassJudger implements ClassFileTransformer {
         return this.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
     }
 
-    public void addToKill(Class<?> clazz, RandomSource random) {
-        this.toKill.put(clazz, random);
+    public void addToKill(Class<?> clazz, Sentence sentence) {
+        this.toKill.put(clazz, sentence);
     }
 
     public void cancel(Class<?> clazz) {
         this.toKill.remove(clazz);
     }
 
-    public void killClasses() throws UnmodifiableClassException {
+    public void killClass(Class<?> clazz) throws UnmodifiableClassException {
         try {
-            this.inst.retransformClasses(this.toKill.keySet().toArray(new Class[0]));
+            this.inst.retransformClasses(clazz);
         } catch (Exception e) {
             if (e instanceof UnmodifiableClassException ee) {
                 throw ee;

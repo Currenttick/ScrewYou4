@@ -1,6 +1,8 @@
 package fr.geming400.screwyou4;
 
+import fr.geming400.screwyou4.commands.ScrewOverCommand;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
+import fr.geming400.screwyou4.killer.Sentence;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -36,12 +38,14 @@ public class ScrewYou4 implements ModInitializer {
 		}
 
 		onLocalPlayerRespawn(player -> {
-            ClassExecutioner.kill(player.getRandom());
+            ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()));
         });
 
 		onDedicatedServerPlayerRespawn(player -> {
-            ClassExecutioner.kill(player.getRandom());
+            ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()));
         });
+
+		ScrewOverCommand.initialize();
 	}
 
 	private static void onLocalPlayerRespawn(RespawnCallback onRespawn) {

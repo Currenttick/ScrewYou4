@@ -92,7 +92,7 @@ public class MethodTerminator {
                 bcg.returnFloat();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
-            default -> throw new UnsupportedOperationException("Method terminator do not supports " + this.returnType + " yet!");
+            default -> throw new UnsupportedOperationException("Method terminator do not supports " + this.returnType + " return type yet!");
         }
     }
 }

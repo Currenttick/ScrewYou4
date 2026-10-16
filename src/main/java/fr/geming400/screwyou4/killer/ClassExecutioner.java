@@ -1,41 +1,45 @@
 package fr.geming400.screwyou4.killer;
 
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
-import net.minecraft.util.RandomSource;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 
 public class ClassExecutioner implements PreLaunchEntrypoint {
 
     private static Class<?> agentClass;
     private static ClassJudger classJudger;
 
-    public static void kill(RandomSource random) {
-        checkClassDecoderPresent();
-        Instrumentation inst = classJudger.getInstrumentation();
-        Class<?>[] classes = inst.getAllLoadedClasses();
+    public static void kill(Sentence sentence) {
+        Class<?>[] classes = getLoadedClasses();
         Class<?> toKill;
         do {
-            toKill = classes[random.nextInt(classes.length)];
-        } while (!tryRetransform(random, toKill, inst));
+            toKill = classes[sentence.random().nextInt(classes.length)];
+        } while (tryRetransform(sentence, toKill).isPresent());
+    }
+
+    public static Class<?>[] getLoadedClasses() {
+        checkClassDecoderPresent();
+        Instrumentation inst = classJudger.getInstrumentation();
+        return (Class<?>[]) inst.getAllLoadedClasses();
     }
 
     /**
      * @return whether it was successful
      */
-    private static boolean tryRetransform(RandomSource random, Class<?> toKill, Instrumentation inst) {
+    public static Optional<Exception> tryRetransform(Sentence sentence, Class<?> toKill) {
         try {
             if (toKill.isInterface() || toKill.isAnnotation()) {
-                return false; // Not supported for now...
+                return Optional.of(new UnsupportedOperationException("Interfaces and annotations not supported yet :(")); // Not supported for now...
             }
-            classJudger.addToKill(toKill, random);
-            classJudger.killClasses();
+            classJudger.addToKill(toKill, sentence);
+            classJudger.killClass(toKill);
         } catch (Exception e) {
             classJudger.cancel(toKill);
-            return false;
+            return Optional.of(e);
         }
-        return true;
+        return Optional.empty();
     }
 
     @Override
