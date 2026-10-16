@@ -1,15 +1,17 @@
 package fr.geming400.screwyou4.killer;
 
 import fr.geming400.screwyou4.ScrewYou4;
+import fr.geming400.screwyou4.Utils;
 import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
-import fr.geming400.screwyou4.killer.parser.MethodTerminator;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 public class ClassJudger implements ClassFileTransformer {
 
     public static final boolean VERBOSE = false;
+    public static final boolean NOTIFY_PLAYER = true;
     public static final boolean POST_MORTEM = true;
     public static FileOutputStream logFileStream = null;
 
@@ -61,7 +64,7 @@ public class ClassJudger implements ClassFileTransformer {
                 ClassRepresentation image2 = new ClassRepresentation(classfileBuffer);
                 ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
                 Infos.MethodInfo chosenMethod = infos.get(random.nextInt(infos.size()));
-                MethodTerminator terminator = new MethodTerminator(chosenMethod);
+                MethodTerminator terminator = new MethodTerminator(chosenMethod, random);
                 terminator.terminate();
                 byte[] buffer = image2.toByteArray();
                 if (POST_MORTEM) {
@@ -76,15 +79,23 @@ public class ClassJudger implements ClassFileTransformer {
                             StandardOpenOption.CREATE
                     );
                 }
-                ScrewYou4.LOGGER.info("Killed method {} in {} (CLIENT)", chosenMethod.getName(), classBeingRedefined);
+                notifyKilled(classBeingRedefined, chosenMethod);
                 return buffer;
             } catch (Exception e) {
-                if (!(e instanceof UnsupportedOperationException && e.getMessage().contains("Method terminator"))) {
-                    ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
-                    assert Minecraft.getInstance().player != null;
-                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("Failed to transform class : " + e));
+                // for some strange reason, you cannot re-transform classes from this thread
+                if (!(e instanceof IllegalStateException && (e.getMessage().contains("Rendersystem")))) {
+                    Thread.ofVirtual().start(() -> ClassExecutioner.kill(random));
+                    if (
+                            !(
+                                    (e instanceof UnsupportedOperationException && e.getMessage().contains("Method terminator"))
+                                            || (e instanceof IllegalArgumentException && e.getMessage().contains("Code attribute"))
+                            )
+                    ) {
+                        ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
+                        assert Minecraft.getInstance().player != null;
+                        Utils.tellRaw("\"Failed to transform class : " + e + "\"");
+                    }
                 }
-                Thread.ofVirtual().start(() -> ClassExecutioner.kill(random));
             }
         }
         return null;
@@ -104,11 +115,30 @@ public class ClassJudger implements ClassFileTransformer {
     }
 
     public void killClasses() throws UnmodifiableClassException {
-        this.inst.retransformClasses(this.toKill.keySet().toArray(new Class[0]));
+        try {
+            this.inst.retransformClasses(this.toKill.keySet().toArray(new Class[0]));
+        } catch (Exception e) {
+            if (e instanceof UnmodifiableClassException ee) {
+                throw ee;
+            }
+            ScrewYou4.LOGGER.error("", e);
+        }
     }
 
     public Instrumentation getInstrumentation() {
         return this.inst;
+    }
+
+    public static void notifyKilled(Class<?> clazz, Infos.MethodInfo method) {
+        ScrewYou4.LOGGER.info("Killed method {} in {} (CLIENT)", method.getName(), clazz);
+        if (NOTIFY_PLAYER) {
+            assert Minecraft.getInstance().player != null;
+            String name = clazz.getSimpleName();
+            if (name.isEmpty()) {
+                name = clazz.getName();
+            }
+            Utils.tellRaw("[{text:Killed},{text:\" " + name + "." + method.getShortName() + "(...)\",color:red}]");
+        }
     }
 
     public static void log(String message) {

@@ -17,6 +17,10 @@ public interface Field<N> extends ClassWriteable {
         protected N value;
 
         public AbstractField(ByteBuffer ignoredBuffer) {}
+        
+        public AbstractField(N value) {
+            this.value = value;
+        }
 
         public String toString() {
             return this.value.getClass().getName() + ":" + this.getValue();
@@ -55,13 +59,11 @@ public interface Field<N> extends ClassWriteable {
     class ByteField extends AbstractField<Byte> {
 
         public ByteField(byte b) {
-            super(null);
-            this.value = b;
+            super(b);
         }
 
         public ByteField(ByteBuffer buffer) {
-            super(buffer);
-            this.value = buffer.get();
+            super(buffer.get());
         }
 
         @Override
@@ -78,8 +80,11 @@ public interface Field<N> extends ClassWriteable {
     class ShortField extends AbstractField<Short> {
 
         public ShortField(ByteBuffer buffer) {
-            super(buffer);
-            this.value = buffer.getShort();
+            super(buffer.getShort());
+        }
+        
+        public ShortField(short value) {
+            super(value);
         }
 
         @Override
@@ -96,8 +101,11 @@ public interface Field<N> extends ClassWriteable {
     class IntField extends AbstractField<Integer> {
 
         public IntField(ByteBuffer buffer) {
-            super(buffer);
-            this.value = buffer.getInt();
+            super(buffer.getInt());
+        }
+        
+        public IntField(int value) {
+            super(value);
         }
 
         @Override
@@ -114,8 +122,11 @@ public interface Field<N> extends ClassWriteable {
     class LongField extends AbstractField<Long> {
 
         public LongField(ByteBuffer buffer) {
-            super(buffer);
-            this.value = buffer.getLong();
+            super(buffer.getLong());
+        }
+        
+        public LongField(long value) {
+            super(value);
         }
 
         @Override
@@ -132,8 +143,11 @@ public interface Field<N> extends ClassWriteable {
     class FloatField extends AbstractField<Float> {
 
         public FloatField(ByteBuffer buffer) {
-            super(buffer);
-            this.value = buffer.getFloat();
+            super(buffer.getFloat());
+        }
+
+        public FloatField(float value) {
+            super(value);
         }
 
         @Override
@@ -150,8 +164,11 @@ public interface Field<N> extends ClassWriteable {
     class DoubleField extends AbstractField<Double> {
 
         public DoubleField(ByteBuffer buffer) {
-            super(buffer);
-            this.value = buffer.getDouble();
+            super(buffer.getDouble());
+        }
+
+        public DoubleField(double value) {
+            super(value);
         }
 
         @Override
@@ -172,6 +189,10 @@ public interface Field<N> extends ClassWriteable {
             byte[] bytes = new byte[buffer.getShort()];
             buffer.get(bytes);
             this.value = new String(bytes);
+        }
+        
+        public Utf8Field(String value) {
+            super(value);
         }
 
         @Override
@@ -196,6 +217,10 @@ public interface Field<N> extends ClassWriteable {
             for (short i = 0; i < length; i++) {
                 this.value.add(factory.apply(buffer));
             }
+        }
+
+        public ShortPrefixedArrayField(ArrayList<F> value) {
+            super(value);
         }
 
         @Override
@@ -243,6 +268,13 @@ public interface Field<N> extends ClassWriteable {
                 }
             }
         }
+
+        public void append(PoolEntry entry) {
+            this.value.add(entry);
+            if (entry instanceof PoolEntry.DoublePoolEntry | entry instanceof PoolEntry.LongPoolEntry) {
+                this.value.add(new PoolEntry.UnkownPoolEntry());
+            }
+        }
     }
 
     class IntPrefixedArrayField<F extends AbstractField<?>> extends AbstractField<ArrayList<F>> {
@@ -254,6 +286,10 @@ public interface Field<N> extends ClassWriteable {
             for (int i = 0; i < length; i++) {
                 this.value.add(factory.apply(buffer));
             }
+        }
+
+        public IntPrefixedArrayField(ArrayList<F> value) {
+            super(value);
         }
 
         @Override
@@ -288,6 +324,10 @@ public interface Field<N> extends ClassWriteable {
             super(buffer);
         }
 
+        public ConstantPoolReferenceField(short value) {
+            super(value);
+        }
+
         @Override
         public String format(String fieldName, ConstantPool constantPool) {
             return fieldName + constantPool.get(this.value).format("", constantPool);
@@ -304,7 +344,7 @@ public interface Field<N> extends ClassWriteable {
 
     abstract class FieldElement<F extends ClassWriteable> implements ClassWriteable {
 
-        protected final F field1;
+        public final F field1;
 
         public FieldElement(F field1) {
             this.field1 = field1;
@@ -334,7 +374,7 @@ public interface Field<N> extends ClassWriteable {
 
     abstract class FieldElement2<F1 extends ClassWriteable, F2 extends ClassWriteable> extends FieldElement<F1> {
 
-        protected final F2 field2;
+        public final F2 field2;
 
         public FieldElement2(F1 field1, F2 field2) {
             super(field1);
@@ -367,7 +407,7 @@ public interface Field<N> extends ClassWriteable {
 
     abstract class FieldElement3<F1 extends ClassWriteable, F2 extends ClassWriteable, F3 extends ClassWriteable> extends FieldElement2<F1, F2> {
 
-        protected final F3 field3;
+        public final F3 field3;
 
         public FieldElement3(F1 field1, F2 field2, F3 field3) {
             super(field1, field2);
@@ -400,7 +440,7 @@ public interface Field<N> extends ClassWriteable {
 
     abstract class FieldElement4<F1 extends ClassWriteable, F2 extends ClassWriteable, F3 extends ClassWriteable, F4 extends ClassWriteable> extends FieldElement3<F1, F2, F3> {
 
-        protected final F4 field4;
+        public final F4 field4;
 
         public FieldElement4(F1 field1, F2 field2, F3 field3, F4 field4) {
             super(field1, field2, field3);

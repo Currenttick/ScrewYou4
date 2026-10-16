@@ -1,5 +1,7 @@
 package fr.geming400.screwyou4;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
@@ -12,20 +14,6 @@ import java.util.Objects;
 
 public class Utils {
     private Utils() {}
-
-    public static boolean isPackagePrivate(Method method) {
-        int modifiers = method.getModifiers();
-        return !Modifier.isPublic(modifiers)
-                && !Modifier.isProtected(modifiers)
-                && !Modifier.isPrivate(modifiers);
-    }
-
-    public static boolean isPackagePrivate(Class<?> clazz) {
-        int modifiers = clazz.getModifiers();
-        return !Modifier.isPublic(modifiers)
-                && !Modifier.isProtected(modifiers)
-                && !Modifier.isPrivate(modifiers);
-    }
 
     public static boolean hasDefaultAccessibleConstructor(Class<?> clazz) {
         if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isPrimitive())
@@ -129,5 +117,16 @@ public class Utils {
         Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         return map;
+    }
+
+    public static void tellRaw(String message) {
+        StringBuilder messageBuilder = new StringBuilder();
+        for (char c : message.toCharArray()) {
+            if (StringUtil.isAllowedChatCharacter(c)) {
+                messageBuilder.append(c);
+            }
+        }
+        assert Minecraft.getInstance().player != null;
+        Minecraft.getInstance().player.connection.sendCommand("tellraw @a " + messageBuilder);
     }
 }

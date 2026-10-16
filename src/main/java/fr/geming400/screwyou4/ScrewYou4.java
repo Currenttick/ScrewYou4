@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.instrument.Instrumentation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,16 +22,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ScrewYou4 implements ModInitializer {
 	public static final String MOD_ID = "screw-you-4";
 
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's fieldName.
-	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
 
 		LOGGER.info("Hello from the mod that will Screw You (4) !");
 
@@ -43,17 +36,12 @@ public class ScrewYou4 implements ModInitializer {
 		}
 
 		onLocalPlayerRespawn(player -> {
-			String killed_method = ClassExecutioner.kill(player.getRandom());
-		});
+            ClassExecutioner.kill(player.getRandom());
+        });
 
 		onDedicatedServerPlayerRespawn(player -> {
-			String killed_method = ClassExecutioner.kill(player.getRandom());
-		});
-	}
-
-	public static void premain(String agentArgs, Instrumentation inst) {
-		LOGGER.info("\n".repeat(6));
-		LOGGER.info("Loadded boyyyyy");
+            ClassExecutioner.kill(player.getRandom());
+        });
 	}
 
 	private static void onLocalPlayerRespawn(RespawnCallback onRespawn) {
@@ -65,7 +53,6 @@ public class ScrewYou4 implements ModInitializer {
 					if (player.isDeadOrDying()) {
 						isDead.set(true);
 					} else if (isDead.get()) {
-						LOGGER.debug("Local player {} has respawned !", player);
 						isDead.set(false);
 
 						onRespawn.onRespawn(player);
@@ -83,7 +70,6 @@ public class ScrewYou4 implements ModInitializer {
 					if (player.isDeadOrDying()) {
 						deadState.get().put(player.getId(), true);
 					} else if (deadState.get().getOrDefault(player.getId(), false)) {
-						LOGGER.debug("Local player {} has respawned !", player);
 						deadState.get().put(player.getId(), false);
 
 						onRespawn.onRespawn(player);
@@ -92,16 +78,6 @@ public class ScrewYou4 implements ModInitializer {
 			});
 		}
 	}
-
-//	public static void killMethod(long method) {
-//		KILLED_METHODS.add(method);
-//		if (KILLED_METHODS.size() == METHODS.size())
-//			LOGGER.info("Gg. You have destroyed everything. Wait, how are you even playing the game...");
-//	}
-//
-//	public static boolean isMethodAlive(long method) {
-//		return !KILLED_METHODS.contains(method);
-//	}
 
 	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);

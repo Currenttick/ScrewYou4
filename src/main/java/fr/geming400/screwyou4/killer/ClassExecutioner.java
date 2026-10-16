@@ -11,7 +11,7 @@ public class ClassExecutioner implements PreLaunchEntrypoint {
     private static Class<?> agentClass;
     private static ClassJudger classJudger;
 
-    public static String kill(RandomSource random) {
+    public static void kill(RandomSource random) {
         checkClassDecoderPresent();
         Instrumentation inst = classJudger.getInstrumentation();
         Class<?>[] classes = inst.getAllLoadedClasses();
@@ -19,7 +19,6 @@ public class ClassExecutioner implements PreLaunchEntrypoint {
         do {
             toKill = classes[random.nextInt(classes.length)];
         } while (!tryRetransform(random, toKill, inst));
-        return toKill.getName();
     }
 
     /**

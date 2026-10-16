@@ -80,7 +80,11 @@ public abstract class Infos implements ClassWriteable {
         }
 
         public String getName() {
-            return this.field2.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue() + this.field3.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue();
+            return this.getShortName() + this.getDesc();
+        }
+
+        public String getShortName() {
+            return this.field2.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue();
         }
 
         public String getDesc() {
