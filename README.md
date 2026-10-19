@@ -31,15 +31,33 @@ You can look at how amazing benchmark comparing sodium to screw you 4:
 
 Crazy, right ? Screw you 4 is the future of minecraft optimization !
 
-## How to create these beautiful mixins
-
-There is a custom Idea configuration called `Mixin Generator` which allows you to generate all mixins.
-By default, this requires python as the `mixin` folder is cleaned before
-building to prevent any building errors but this can be disabled in the configuration.
-
 ### How does it work
 
-Using reflection, all `net.minecraft.**` classes are loaded and then inspected
-to create these mixins.
+#### New way: (>= `v1.0.3`)
 
-All the work is done in the `Generator.java` file.
+Using a sophisticated technology known as *"java agents"*, we at Screw You 4™
+have brought you even more screws !
+
+For reference, here's an accurate depiction of what this looks like:
+
+<img alt="Accurate depiction of you being screwed over (4)" height="256" width="256" src="readmeResources/screwing-you-4.png"/>
+
+Or if you're feeling a little *screwy*:
+
+<img alt="Accurate depiction of you being screwed over (4) (Mk. 2)" height="128" width="512" src="readmeResources/screws.png"/>
+
+> These are some beautiful screws right there<br>
+> \- Geming400, 2026
+
+---
+
+Seriously, like mixins, classes are "transformed" at runtime.
+Except, these transformations only happen on the player's death.
+
+#### Old way
+
+Old way: (prior to `v1.0.3`)
+> Using reflection, all `net.minecraft.**` classes are loaded and then inspected
+> to create these mixins.
+>
+> All the work is done in the `Generator.java` file.
