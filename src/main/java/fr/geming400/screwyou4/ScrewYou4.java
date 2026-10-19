@@ -28,14 +28,13 @@ public class ScrewYou4 implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-
 		LOGGER.info("Hello from the mod that will Screw You (4) !");
 
-		// FIXME
-		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
-			LOGGER.error("Dedicated servers are not supported yet");
-			throw new RuntimeException("Dedicated servers are not supported yet");
-		}
+		// It should work on dedicated servers now
+//		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+//			LOGGER.error("Dedicated servers are not supported yet");
+//			throw new RuntimeException("Dedicated servers are not supported yet");
+//		}
 
 		onLocalPlayerRespawn(player -> {
             ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()));
