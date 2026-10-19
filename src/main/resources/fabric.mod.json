@@ -22,9 +22,6 @@
 			"fr.geming400.screwyou4.killer.ClassExecutioner"
 		]
 	},
-	"mixins": [
-		"screw-you-4.mixins.json"
-	],
 	"depends": {
 		"fabricloader": ">=0.19.3",
 		"minecraft": "*",
