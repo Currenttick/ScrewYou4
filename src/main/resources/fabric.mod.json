@@ -5,7 +5,20 @@
 	"name": "Screw you 4",
 	"description": "Screws your game over",
 	"authors": [
-		"Geming400"
+		{
+			"name": "Geming400",
+			"contact": {
+				"homepage": "https://github.com/Geming400"
+			}
+		}
+	],
+	"contributors": [
+		{
+			"name": "Currenttick",
+			"contact": {
+				"homepage": "https://github.com/Currenttick"
+			}
+		}
 	],
 	"contact": {
 		"homepage": "https://github.com/Geming400/ScrewYou4",
