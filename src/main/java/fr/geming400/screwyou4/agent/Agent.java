@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -19,6 +18,9 @@ import java.util.Objects;
 import java.util.jar.JarFile;
 
 public class Agent {
+    private static final String MOD_VERSION = "1.0.3";
+    /// Only used in a dev environment
+    private static final String MOD_PATH = "../build/libs/%s-%s.jar".formatted(ScrewYou4.MOD_ID, MOD_VERSION);
 
     private static Instrumentation INSTRUMENTATION = null;
     private volatile static Process runningAgent;
@@ -60,7 +62,7 @@ public class Agent {
                 .filter(name -> name.contains("screw") && name.contains("you"))
                 .findFirst()
                 .map(name -> "mods/" + name)
-                .orElse("../build/libs/screw-you-4-1.0.1.jar");
+                .orElse(MOD_PATH);
         ScrewYou4.LOGGER.info("found mod's jar : {}", fileName);
         Thread t = new Thread(() -> {
             try {
@@ -88,6 +90,7 @@ public class Agent {
                 throw new RuntimeException(e);
             }
         });
+
         t.start();
         while (t.isAlive()) {
             Thread.onSpinWait();
