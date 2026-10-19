@@ -52,7 +52,13 @@ java {
 jar {
 	def projectName = project.name
 	inputs.property "projectName", projectName
-
+	manifest {
+		attributes(
+				"Agent-Class": "fr.geming400.screwyou4.agent.Agent",
+				"Can-Redefine-Classes": true,
+				"Can-Retransform-Classes": true
+		)
+	}
 	from("LICENSE") {
 		rename { "${it}_$projectName"}
 	}

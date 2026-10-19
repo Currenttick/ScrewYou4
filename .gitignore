@@ -42,3 +42,4 @@ replay_*.log
 # logs
 
 /logs
+/src/main/java/fr/geming400/screwyou4/mixin/

@@ -1,29 +1,19 @@
 package fr.geming400.screwyou4;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Utils {
     private Utils() {}
-
-    public static boolean isPackagePrivate(Method method) {
-        int modifiers = method.getModifiers();
-        return !Modifier.isPublic(modifiers)
-                && !Modifier.isProtected(modifiers)
-                && !Modifier.isPrivate(modifiers);
-    }
-
-    public static boolean isPackagePrivate(Class<?> clazz) {
-        int modifiers = clazz.getModifiers();
-        return !Modifier.isPublic(modifiers)
-                && !Modifier.isProtected(modifiers)
-                && !Modifier.isPrivate(modifiers);
-    }
 
     public static boolean hasDefaultAccessibleConstructor(Class<?> clazz) {
         if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isPrimitive())
@@ -76,5 +66,67 @@ public class Utils {
         } else {
             return !Modifier.isPublic(clazz.getModifiers()) || isPrivateOrHasPrivateEnclosingClass(clazz.getEnclosingClass());
         }
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, V v6) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2, K k3, V v3) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1, K k2, V v2) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+
+    public static <K, V> Map<K, V> linkedMapOf(K k1, V v1) {
+        Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        return map;
+    }
+
+    public static void tellRaw(String message) {
+        StringBuilder messageBuilder = new StringBuilder();
+        for (char c : message.toCharArray()) {
+            if (StringUtil.isAllowedChatCharacter(c)) {
+                messageBuilder.append(c);
+            }
+        }
+        assert Minecraft.getInstance().player != null;
+        Minecraft.getInstance().player.connection.sendCommand("tellraw @a " + messageBuilder);
     }
 }
