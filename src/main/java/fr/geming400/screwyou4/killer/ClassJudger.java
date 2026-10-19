@@ -24,7 +24,7 @@ public class ClassJudger implements ClassFileTransformer {
 
     public static final boolean VERBOSE = false;
     public static final boolean NOTIFY_PLAYER = true;
-    public static final boolean POST_MORTEM = true;
+    public static final boolean POST_MORTEM = false;
     public static FileOutputStream logFileStream = null;
 
     public static FileOutputStream getLogFileStream() {

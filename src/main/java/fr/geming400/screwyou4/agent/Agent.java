@@ -11,18 +11,23 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.jar.JarFile;
 
 public class Agent {
 
     private static Instrumentation INSTRUMENTATION = null;
     private volatile static Process runningAgent;
 
-    public static void agentmain(String agentArgs, Instrumentation inst) {
+    public static void agentmain(String agentArgs, Instrumentation inst) throws Exception {
         INSTRUMENTATION = inst;
+        ScrewYou4.LOGGER.info("Adding {} to classpath.", agentArgs);
+        inst.appendToSystemClassLoaderSearch(new JarFile(new File(agentArgs)));
+        ScrewYou4.LOGGER.info("loader : {}", Agent.class.getClassLoader().getName());
         ScrewYou4.LOGGER.info("Agent initialized!");
     }
 
@@ -54,8 +59,10 @@ public class Agent {
         String fileName = Arrays.stream(Objects.requireNonNull(FabricLoaderImpl.INSTANCE.getModsDirectory().list()))
                 .filter(name -> name.contains("screw") && name.contains("you"))
                 .findFirst()
+                .map(name -> "mods/" + name)
                 .orElse("../build/libs/screw-you-4-1.0.1.jar");
-        new Thread(() -> {
+        ScrewYou4.LOGGER.info("found mod's jar : {}", fileName);
+        Thread t = new Thread(() -> {
             try {
                 assert stream != null;
                 File subFolder = new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "fr");
@@ -75,17 +82,15 @@ public class Agent {
                         .inheritIO()
                         .start();
                 runningAgent.waitFor();
-                System.out.println("Finished attaching");
+                ScrewYou4.LOGGER.info("Finished attaching");
                 runningAgent = null;
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
-    }
-
-    static {
-        if (!Agent.class.getClassLoader().equals(ClassLoader.getSystemClassLoader())) {
-            throw new RuntimeException("Agent not loaded from system classloader!");
+        });
+        t.start();
+        while (t.isAlive()) {
+            Thread.onSpinWait();
         }
     }
 }

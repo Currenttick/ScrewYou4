@@ -19,15 +19,15 @@ public class AgentLauncher {
                 File agentJar = new File(args[1]);
                 System.out.printf("Attaching agent at %s...\n", agentJar.getAbsolutePath());
                 vm = VirtualMachine.attach(args[0]);
-                vm.loadAgent(args[1]);
+                vm.loadAgent(args[1], args[1]);
             } catch (AttachNotSupportedException | IOException | AgentLoadException | AgentInitializationException e) {
                 System.out.println(e.getMessage());
             } finally {
                 if (vm != null) {
                     vm.detach();
                 }
+                System.out.println("Attachment successful!");
             }
-            System.out.println("Attachment successful!");
         }
     }
 }

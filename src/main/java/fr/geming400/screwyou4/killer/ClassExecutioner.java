@@ -1,5 +1,6 @@
 package fr.geming400.screwyou4.killer;
 
+import fr.geming400.screwyou4.agent.Agent;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 
 import java.lang.instrument.Instrumentation;
@@ -45,8 +46,8 @@ public class ClassExecutioner implements PreLaunchEntrypoint {
     @Override
     public void onPreLaunch() {
         try {
-            agentClass = ClassLoader.getSystemClassLoader().loadClass("fr.geming400.screwyou4.agent.Agent");
-            agentClass.getDeclaredMethod("launch").invoke(null);
+            Agent.class.getDeclaredMethod("launch").invoke(null);
+            agentClass = ClassLoader.getSystemClassLoader().loadClass(Agent.class.getName());
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
