@@ -20,7 +20,9 @@ public class ClassArgumentType implements ArgumentType<Class<?>> {
     @Override
     public Class<?> parse(StringReader reader) throws CommandSyntaxException {
         String[] strings = reader.getRemaining().split(" ");
-        while (reader.canRead() && reader.read() != ' ');
+        while (reader.canRead() && reader.peek() != ' ') {
+            reader.skip();
+        };
         String className = strings[0];
         try {
             return Arrays.stream(ClassExecutioner.getLoadedClasses()).filter(c -> c.getName().equals(className)).findFirst().orElseThrow();

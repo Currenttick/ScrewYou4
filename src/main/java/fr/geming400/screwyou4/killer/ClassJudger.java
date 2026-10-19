@@ -24,7 +24,7 @@ public class ClassJudger implements ClassFileTransformer {
 
     public static final boolean VERBOSE = false;
     public static final boolean NOTIFY_PLAYER = true;
-    public static final boolean POST_MORTEM = false;
+    public static final boolean POST_MORTEM = true;
     public static FileOutputStream logFileStream = null;
 
     public static FileOutputStream getLogFileStream() {
@@ -59,10 +59,19 @@ public class ClassJudger implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (this.toKill.containsKey(classBeingRedefined)) {
             final Sentence sentence = this.toKill.remove(classBeingRedefined);
+            if (sentence.bufferEater().isPresent()) {
+                sentence.bufferEater().get().accept(classfileBuffer);
+                return null;
+            }
             try {
-                ClassRepresentation image2 = new ClassRepresentation(classfileBuffer);
-                ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
-                Infos.MethodInfo chosenMethod = infos.get(sentence.random().nextInt(infos.size()));
+                ClassRepresentation image2 = sentence.representation().isPresent() ? sentence.representation().get() : new ClassRepresentation(classfileBuffer);
+                final Infos.MethodInfo chosenMethod;
+                if (sentence.methodInfo().isPresent()) {
+                    chosenMethod = sentence.methodInfo().get();
+                } else {
+                    ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
+                    chosenMethod = infos.get(sentence.random().nextInt(infos.size()));
+                }
                 MethodTerminator terminator = new MethodTerminator(chosenMethod, sentence.random());
                 terminator.terminate();
                 byte[] buffer = image2.toByteArray();
@@ -82,8 +91,8 @@ public class ClassJudger implements ClassFileTransformer {
                 return buffer;
             } catch (Exception e) {
                 // for some strange reason, you cannot re-transform classes from this thread
-                if (!(e instanceof IllegalStateException && (e.getMessage().contains("Rendersystem"))) && sentence.shouldTryAnother()) {
-                    Thread.ofVirtual().start(() -> ClassExecutioner.kill(sentence));
+                if (sentence.shouldTryAnother()) {
+                    Thread.ofVirtual().start(() -> ClassExecutioner.kill(sentence.fork()));
                     if (
                             !(
                                     (e instanceof UnsupportedOperationException && e.getMessage().contains("Method terminator"))
@@ -94,7 +103,7 @@ public class ClassJudger implements ClassFileTransformer {
                         assert Minecraft.getInstance().player != null;
                         Utils.tellRaw("\"Failed to transform class : " + e + "\"");
                     }
-                } else if (!(e instanceof IllegalStateException && (e.getMessage().contains("Rendersystem")))) {
+                } else {
                     assert Minecraft.getInstance().player != null;
                     Utils.tellRaw("\"Failed to transform class : " + e + "\"");
                 }

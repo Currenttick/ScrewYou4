@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import fr.geming400.screwyou4.ScrewYou4;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
 import fr.geming400.screwyou4.killer.Sentence;
+import fr.geming400.screwyou4.killer.parser.Infos;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
@@ -31,6 +32,11 @@ public class ScrewOverCommand {
                 ClassArgumentType.class,
                 SingletonArgumentInfo.contextFree(ClassArgumentType::new)
         );
+        ArgumentTypeRegistry.registerArgumentType(
+                ScrewYou4.id("method"),
+                MethodArgumentType.class,
+                SingletonArgumentInfo.contextFree(MethodArgumentType::new)
+        );
     }
 
     public static void registerKillCommand(LiteralArgumentBuilder<CommandSourceStack> builder) {
@@ -49,7 +55,20 @@ public class ScrewOverCommand {
                                     Optional<Exception> ex = ClassExecutioner.tryRetransform(new Sentence(Objects.requireNonNull(context.getSource().getPlayer()).getRandom().fork(), false), clazz);
                                     ex.ifPresent(e -> context.getSource().sendFailure(Component.literal("Error while killing " + clazz.getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage())));
                                     return Command.SINGLE_SUCCESS;
-                                })))
+                                })
+                                        .then(Commands.argument("method_name", MethodArgumentType.method()).executes(context -> {
+                                            Class<?> clazz = ClassArgumentType.getClass(context, "class_name");
+                                            Infos.MethodInfo method = MethodArgumentType.getMethod(context, "method_name");
+                                            Optional<Exception> ex = ClassExecutioner.tryRetransform(new Sentence(
+                                                    Objects.requireNonNull(context.getSource().getPlayer()).getRandom().fork(),
+                                                    false,
+                                                    Optional.of(method),
+                                                    Optional.of(method.constantPool.classRepresentation),
+                                                    Optional.empty()
+                                            ), clazz);
+                                            ex.ifPresent(e -> context.getSource().sendFailure(Component.literal("Error while killing " + clazz.getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage())));
+                                            return Command.SINGLE_SUCCESS;
+                                                }))))
         );
     }
 

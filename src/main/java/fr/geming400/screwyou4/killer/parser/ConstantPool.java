@@ -7,9 +7,11 @@ import java.util.function.Supplier;
 public class ConstantPool implements ClassWriteable {
 
     private final Field.ConstantPoolEntriesArray entries;
+    public final ClassRepresentation classRepresentation;
 
-    public ConstantPool(ByteBuffer buffer) {
+    public ConstantPool(ByteBuffer buffer, ClassRepresentation classRepresentation) {
         this.entries = new Field.ConstantPoolEntriesArray(buffer);
+        this.classRepresentation = classRepresentation;
     }
 
     @Override

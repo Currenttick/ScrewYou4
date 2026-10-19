@@ -28,7 +28,7 @@ public class ClassRepresentation implements ClassWriteable {
         log("version minor : " + this.minorVersion.value);
         this.majorVersion = new Field.ShortField(data);
         log("version major : " + this.majorVersion.value);
-        this.constantPool = new ConstantPool(data);
+        this.constantPool = new ConstantPool(data, this);
         log(this.constantPool.toString());
         this.accessFlags = new Field.ShortField(data);
         log("access flags : " + this.accessFlags.value);
