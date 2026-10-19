@@ -36,13 +36,13 @@ public class ScrewYou4 implements ModInitializer {
 //			throw new RuntimeException("Dedicated servers are not supported yet");
 //		}
 
-		onLocalPlayerRespawn(player -> {
-            ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()));
-        });
+		onLocalPlayerRespawn(player ->
+				ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()))
+		);
 
-		onDedicatedServerPlayerRespawn(player -> {
-            ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()));
-        });
+		onDedicatedServerPlayerRespawn(player ->
+				ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()))
+		);
 
 		ScrewOverCommand.initialize();
 	}
