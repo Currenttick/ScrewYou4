@@ -102,10 +102,12 @@ public class ClassJudger implements ClassFileTransformer {
                         ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
                         assert Minecraft.getInstance().player != null;
                         Utils.tellRaw("\"Failed to transform class : " + e + "\"");
+                        ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
                     }
                 } else {
                     assert Minecraft.getInstance().player != null;
                     Utils.tellRaw("\"Failed to transform class : " + e + "\"");
+                    ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
                 }
             }
         }
@@ -148,6 +150,7 @@ public class ClassJudger implements ClassFileTransformer {
             if (name.isEmpty()) {
                 name = clazz.getName();
             }
+
             Utils.tellRaw("[{text:Killed},{text:\" " + name + "." + method.getShortName() + "(...)\",color:red}]");
         }
     }
