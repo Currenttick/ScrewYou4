@@ -92,6 +92,7 @@ public class Agent {
         });
 
         t.start();
+        //noinspection LoopConditionNotUpdatedInsideLoop
         while (t.isAlive()) {
             Thread.onSpinWait();
         }

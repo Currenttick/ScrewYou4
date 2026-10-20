@@ -9,13 +9,16 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,12 +33,6 @@ public class ScrewYou4 implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Hello from the mod that will Screw You (4) !");
 
-		// It should work on dedicated servers now
-//		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
-//			LOGGER.error("Dedicated servers are not supported yet");
-//			throw new RuntimeException("Dedicated servers are not supported yet");
-//		}
-
 		onLocalPlayerRespawn(player ->
 				ClassExecutioner.kill(Sentence.ofIterating(player.getRandom()))
 		);
@@ -47,21 +44,32 @@ public class ScrewYou4 implements ModInitializer {
 		ScrewOverCommand.initialize();
 	}
 
-	private static void onLocalPlayerRespawn(RespawnCallback onRespawn) {
+	// If lambda, then the game will crash while loading LocalPlayer class (Client)
+	@SuppressWarnings({"Convert2Lambda"})
+    private static void onLocalPlayerRespawn(RespawnCallback onRespawn) {
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			AtomicBoolean isDead = new AtomicBoolean();
-			ClientTickEvents.START_CLIENT_TICK.register(client -> {
-				Player player = client.player;
-				if (player != null) {
-					if (player.isDeadOrDying()) {
-						isDead.set(true);
-					} else if (isDead.get()) {
-						isDead.set(false);
-
-						onRespawn.onRespawn(player);
+            try {
+				Object startClientTick = ClientTickEvents.class.getDeclaredField("START_CLIENT_TICK").get(null);
+				Method register = startClientTick.getClass().getDeclaredMethod("register", Object.class);
+				register.setAccessible(true);
+				register.invoke(startClientTick, new ClientTickEvents.StartTick() {
+					@Override
+					public void onStartTick(@NonNull Minecraft client) {
+						Player player = client.player;
+						if (player != null) {
+							if (player.isDeadOrDying()) {
+								isDead.set(true);
+							} else if (isDead.get()) {
+								isDead.set(false);
+								onRespawn.onRespawn(player);
+							}
+						}
 					}
-				}
-			});
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 		}
 	}
 
@@ -74,7 +82,6 @@ public class ScrewYou4 implements ModInitializer {
 						deadState.get().put(player.getId(), true);
 					} else if (deadState.get().getOrDefault(player.getId(), false)) {
 						deadState.get().put(player.getId(), false);
-
 						onRespawn.onRespawn(player);
 					}
 				}

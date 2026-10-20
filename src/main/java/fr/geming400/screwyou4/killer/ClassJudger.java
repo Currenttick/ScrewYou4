@@ -5,7 +5,6 @@ import fr.geming400.screwyou4.Utils;
 import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
-import net.minecraft.client.Minecraft;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -100,12 +99,10 @@ public class ClassJudger implements ClassFileTransformer {
                             )
                     ) {
                         ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
-                        assert Minecraft.getInstance().player != null;
                         Utils.tellRaw("\"Failed to transform class : " + e + "\"");
                         ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
                     }
                 } else {
-                    assert Minecraft.getInstance().player != null;
                     Utils.tellRaw("\"Failed to transform class : " + e + "\"");
                     ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
                 }
@@ -145,7 +142,6 @@ public class ClassJudger implements ClassFileTransformer {
     public static void notifyKilled(Class<?> clazz, Infos.MethodInfo method) {
         ScrewYou4.LOGGER.info("Killed method {} in {} (CLIENT)", method.getName(), clazz);
         if (NOTIFY_PLAYER) {
-            assert Minecraft.getInstance().player != null;
             String name = clazz.getSimpleName();
             if (name.isEmpty()) {
                 name = clazz.getName();
