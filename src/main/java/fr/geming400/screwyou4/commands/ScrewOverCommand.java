@@ -20,6 +20,8 @@ import java.util.Optional;
 public class ScrewOverCommand {
 
     public static void initialize() {
+        registerArguments();
+
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, _, _) -> {
                     LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("screw");
@@ -27,11 +29,15 @@ public class ScrewOverCommand {
                     dispatcher.register(builder);
                 }
         );
+    }
+
+    private static void registerArguments() {
         ArgumentTypeRegistry.registerArgumentType(
                 ScrewYou4.id("class"),
                 ClassArgumentType.class,
                 SingletonArgumentInfo.contextFree(ClassArgumentType::new)
         );
+
         ArgumentTypeRegistry.registerArgumentType(
                 ScrewYou4.id("method"),
                 MethodArgumentType.class,
