@@ -97,6 +97,7 @@ public class Agent {
             }
         });
 
+        t.setName("AgentLauncher replicator");
         t.start();
         //noinspection LoopConditionNotUpdatedInsideLoop
         while (t.isAlive()) {

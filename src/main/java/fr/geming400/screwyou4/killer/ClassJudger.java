@@ -69,6 +69,7 @@ public class ClassJudger implements ClassFileTransformer {
                 sentence.bufferEater().get().accept(classfileBuffer);
                 return null;
             }
+
             try {
                 ClassRepresentation image2 = sentence.representation().isPresent()
                         ? sentence.representation().get()
@@ -91,6 +92,7 @@ public class ClassJudger implements ClassFileTransformer {
                             classfileBuffer,
                             StandardOpenOption.CREATE
                     );
+
                     Files.write(
                             new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "produced.class").toPath(),
                             buffer,
