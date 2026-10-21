@@ -63,3 +63,13 @@ Old way: (prior to `v1.0.3`)
 > to create these mixins.
 >
 > All the work is done in the `Generator.java` file.
+ 
+## Contributing
+
+To build the mod, do like you would do it in any IDE.
+However, to build the java agent you must execute the `jar` task:
+
+```shell
+./gradlew jar
+```
+
