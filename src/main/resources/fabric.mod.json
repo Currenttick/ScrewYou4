@@ -28,8 +28,14 @@
 	"icon": "assets/screw-you-4/icon.png",
 	"environment": "*",
 	"entrypoints": {
+		"client": [
+			"fr.geming400.screwyou4.entrypoints.ScrewYou4Client"
+		],
+		"server": [
+			"fr.geming400.screwyou4.entrypoints.ScrewYou4Server"
+		],
 		"main": [
-			"fr.geming400.screwyou4.ScrewYou4"
+			"fr.geming400.screwyou4.entrypoints.ScrewYou4"
 		],
 		"preLaunch": [
 			"fr.geming400.screwyou4.killer.ClassExecutioner"

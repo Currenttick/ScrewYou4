@@ -3,7 +3,7 @@ package fr.geming400.screwyou4.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import fr.geming400.screwyou4.ScrewYou4;
+import fr.geming400.screwyou4.entrypoints.ScrewYou4;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
 import fr.geming400.screwyou4.killer.Sentence;
 import fr.geming400.screwyou4.killer.parser.Infos;

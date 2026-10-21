@@ -1,6 +1,6 @@
 package fr.geming400.screwyou4.agent;
 
-import fr.geming400.screwyou4.ScrewYou4;
+import fr.geming400.screwyou4.entrypoints.ScrewYou4;
 import fr.geming400.screwyou4.killer.AgentLauncher;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
 import net.fabricmc.loader.impl.FabricLoaderImpl;

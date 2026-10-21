@@ -1,6 +1,6 @@
 package fr.geming400.screwyou4.killer;
 
-import fr.geming400.screwyou4.ScrewYou4;
+import fr.geming400.screwyou4.entrypoints.ScrewYou4;
 import fr.geming400.screwyou4.Utils;
 import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
