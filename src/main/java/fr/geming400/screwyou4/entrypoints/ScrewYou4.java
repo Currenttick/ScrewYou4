@@ -2,6 +2,7 @@ package fr.geming400.screwyou4.entrypoints;
 
 import fr.geming400.screwyou4.commands.ScrewOverCommand;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -20,6 +21,8 @@ public class ScrewYou4 implements ModInitializer {
 		LOGGER.info("Hello from the mod that will Screw You (4) !");
 
 		ScrewOverCommand.initialize();
+
+		ServerLevelEvents.LOAD.register((server, level) -> ScrewYou4.level = level);
 	}
 
 	public static Identifier id(String path) {
