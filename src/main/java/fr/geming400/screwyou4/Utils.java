@@ -21,7 +21,7 @@ public final class Utils {
             }
             if (((Boolean) minecraft.getClass().getDeclaredMethod("isLocalServer").invoke(minecraft)) == false) {
                 return;
-            };
+            }
             Object player = minecraft.getClass().getDeclaredField("player").get(minecraft);
             Object connection = player.getClass().getDeclaredField("connection").get(player);
             if (connection == null) {
