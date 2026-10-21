@@ -101,6 +101,10 @@ public abstract class PoolEntry implements ClassWriteable {
             super(new Field.ConstantPoolReferenceField(buffer));
         }
 
+        protected OneReferencePoolEntry(short index) {
+            super(new Field.ConstantPoolReferenceField(index));
+        }
+
         @Override
         protected String fieldName() {
             return super.fieldName();
@@ -265,6 +269,10 @@ public abstract class PoolEntry implements ClassWriteable {
 
         public StringPoolEntry(ByteBuffer buffer) {
             super(buffer);
+        }
+
+        public StringPoolEntry(short value) {
+            super(value);
         }
 
         @Override

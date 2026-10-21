@@ -42,8 +42,12 @@ public class BytecodeGenerator {
         this.bytes.add((byte) 0xB1);
     }
 
-    public void returnObject() {
+    public void returnPrimitive() {
         this.bytes.add((byte) 0xAC);
+    }
+
+    public void returnObject() {
+        this.bytes.add((byte) 0xB0);
     }
 
     public void returnLong() {
@@ -117,5 +121,21 @@ public class BytecodeGenerator {
                 poolEntry -> poolEntry instanceof PoolEntry.DoublePoolEntry doublePoolEntry && doublePoolEntry.getField().getValue() == d,
                 () -> new PoolEntry.DoublePoolEntry(d));
         this.loadLongConstant(index);
+    }
+
+    public void pushString(String string) {
+        this.maxLocals++;
+        this.maxStack++;
+        short index = this.constantPool.getIndex(
+                poolEntry -> poolEntry instanceof PoolEntry.StringPoolEntry stringPoolEntry && stringPoolEntry.getField().<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).getField().getValue().equals(string),
+                () -> new PoolEntry.StringPoolEntry(
+                        this.constantPool.getIndex(
+                                poolEntry -> poolEntry instanceof PoolEntry.Utf8PoolEntry utf8PoolEntry && utf8PoolEntry.getField().getValue().equals(string),
+                                () -> new PoolEntry.Utf8PoolEntry(
+                                        string
+                                )
+                        )
+                ));
+        this.loadConstant(index);
     }
 }

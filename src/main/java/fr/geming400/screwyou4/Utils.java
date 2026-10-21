@@ -18,7 +18,7 @@ public final class Utils {
             if (minecraft == null) {
                 return;
             }
-            if (((Boolean) minecraft.getClass().getDeclaredField("isLocalServer").get(minecraft)) == false) {
+            if (((Boolean) minecraft.getClass().getDeclaredMethod("isLocalServer").invoke(minecraft)) == false) {
                 return;
             };
             Object player = minecraft.getClass().getDeclaredField("player").get(minecraft);
@@ -32,8 +32,7 @@ public final class Utils {
                     messageBuilder.append(c);
                 }
             }
-            //noinspection JavaReflectionInvocation
-            connection.getClass().getDeclaredMethod("sendCommand").invoke(connection, "tellraw @a " + messageBuilder);
+            connection.getClass().getDeclaredMethod("sendCommand", String.class).invoke(connection, "tellraw @a " + messageBuilder);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
