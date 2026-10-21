@@ -109,11 +109,11 @@ public class ClassJudger implements ClassFileTransformer {
                             )
                     ) {
                         ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
-                        Utils.tellRaw("\"Failed to transform class : " + e + "\"");
+                        Utils.sendMessageToAllPlayers(Component.literal("\"Failed to transform class : " + e + "\""));
                         ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
                     }
                 } else {
-                    Utils.tellRaw("\"Failed to transform class : " + e + "\"");
+                    Utils.sendMessageToAllPlayers(Component.literal("\"Failed to transform class : " + e + "\""));
                     ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
                 }
             }
@@ -150,14 +150,23 @@ public class ClassJudger implements ClassFileTransformer {
     }
 
     public static void notifyKilled(Class<?> clazz, Infos.MethodInfo method) {
-        ScrewYou4.LOGGER.info("Killed method {} in {} (CLIENT)", method.getName(), clazz);
+        String envName = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT
+                ? "CLIENT"
+                : "SERVER";
+
+        ScrewYou4.LOGGER.info("Killed method {} in {} ({})", method.getName(), clazz, envName);
         if (NOTIFY_PLAYER) {
             String name = clazz.getSimpleName();
             if (name.isEmpty()) {
                 name = clazz.getName();
             }
 
-            Utils.tellRaw("[{text:Killed},{text:\" " + name + "." + method.getShortName() + "(...)\",color:red}]");
+            String displayedMethodName = "%s.%s(...)".formatted(name, method.getShortName());
+
+            Utils.sendMessageToAllPlayers(
+                    Component.literal("Killed ")
+                            .append(Component.literal(displayedMethodName).withColor(TextColor.RED))
+            );
         }
     }
 
