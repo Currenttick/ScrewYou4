@@ -112,13 +112,12 @@ public class ClassJudger implements ClassFileTransformer {
                                             || (e instanceof IllegalArgumentException && e.getMessage().contains("Code attribute"))
                             )
                     ) {
-                        ScrewYou4.LOGGER.error("Failed to transform class : {}", e.getMessage());
                         Utils.sendMessageToAllPlayers(Component.literal("\"Failed to transform class : " + e + "\""));
-                        ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
+                        ScrewYou4.LOGGER.error("Failed to transform class" + className, e);
                     }
                 } else {
                     Utils.sendMessageToAllPlayers(Component.literal("\"Failed to transform class : " + e + "\""));
-                    ScrewYou4.LOGGER.warn("Failed to transform class" + className, e);
+                    ScrewYou4.LOGGER.error("Failed to transform class" + className, e);
                 }
             }
         }
