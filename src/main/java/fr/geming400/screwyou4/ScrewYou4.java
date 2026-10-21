@@ -50,6 +50,7 @@ public class ScrewYou4 implements ModInitializer {
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			AtomicBoolean isDead = new AtomicBoolean();
             try {
+				// Heavy use of reflexion to prevent java from loading net.minecraft.client.* classes, that are inaccessible in EnvType.SERVER
 				Object startClientTick = ClientTickEvents.class.getDeclaredField("START_CLIENT_TICK").get(null);
 				Method register = startClientTick.getClass().getDeclaredMethod("register", Object.class);
 				register.setAccessible(true);

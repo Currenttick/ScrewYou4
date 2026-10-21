@@ -14,6 +14,7 @@ public final class Utils {
             return;
         }
         try {
+            // Heavy use of reflexion to prevent java from loading net.minecraft.client.* classes, that are inaccessible in EnvType.SERVER
             Object minecraft = Minecraft.class.getDeclaredMethod("getInstance").invoke(null);
             if (minecraft == null) {
                 return;
