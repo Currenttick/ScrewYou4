@@ -4,7 +4,11 @@ import fr.geming400.screwyou4.entrypoints.ScrewYou4;
 import fr.geming400.screwyou4.Utils;
 import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +27,8 @@ public class ClassJudger implements ClassFileTransformer {
 
     public static final boolean VERBOSE = false;
     public static final boolean NOTIFY_PLAYER = true;
-    public static final boolean POST_MORTEM = true;
+    private static final boolean POST_MORTEM_PROPERTY = Boolean.parseBoolean(System.getProperty("POST_MORTEM", "false"));
+    public static final boolean POST_MORTEM = FabricLoader.getInstance().isDevelopmentEnvironment() || POST_MORTEM_PROPERTY;
     public static FileOutputStream logFileStream = null;
 
     public static FileOutputStream getLogFileStream() {
@@ -63,7 +68,10 @@ public class ClassJudger implements ClassFileTransformer {
                 return null;
             }
             try {
-                ClassRepresentation image2 = sentence.representation().isPresent() ? sentence.representation().get() : new ClassRepresentation(classfileBuffer);
+                ClassRepresentation image2 = sentence.representation().isPresent()
+                        ? sentence.representation().get()
+                        : new ClassRepresentation(classfileBuffer);
+
                 final Infos.MethodInfo chosenMethod;
                 if (sentence.methodInfo().isPresent()) {
                     chosenMethod = sentence.methodInfo().get();
@@ -71,6 +79,7 @@ public class ClassJudger implements ClassFileTransformer {
                     ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
                     chosenMethod = infos.get(sentence.random().nextInt(infos.size()));
                 }
+
                 MethodTerminator terminator = new MethodTerminator(chosenMethod, sentence.random(), sentence.overrideTerminator().orElse(null));
                 terminator.terminate();
                 byte[] buffer = image2.toByteArray();
@@ -86,6 +95,7 @@ public class ClassJudger implements ClassFileTransformer {
                             StandardOpenOption.CREATE
                     );
                 }
+
                 notifyKilled(classBeingRedefined, chosenMethod);
                 return buffer;
             } catch (Exception e) {

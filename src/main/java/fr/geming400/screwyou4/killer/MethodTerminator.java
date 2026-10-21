@@ -25,12 +25,15 @@ public class MethodTerminator {
                 break;
             }
         }
+
         if (this.method.getName().contains("<init>") || this.method.getName().contains("<clinit>")) {
             throw new UnsupportedOperationException("Method terminator do not supports constructors yet!");
         }
+
         if (codeAttr == null) {
             throw new IllegalArgumentException("Code attribute not found");
         }
+
         this.codeAttribute = codeAttr;
         String desc = this.method.getDesc();
         this.returnType = desc.substring(desc.indexOf(")") + 1);
@@ -41,12 +44,15 @@ public class MethodTerminator {
 //        if (!this.returnType.equals("Ljava/lang/String;")) {
 //            throw new UnsupportedOperationException("Method terminator do not supports return type: " + this.returnType);
 //        }
+
         switch (this.returnType) {
             case "V" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 bcg.returnVoid();
+
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "Z" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -54,9 +60,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushByte((byte) (this.random.nextBoolean() ? 1 : 0));
                 }
+
                 bcg.returnPrimitive();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "B" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -64,9 +72,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushByte((byte) this.random.nextInt());
                 }
+
                 bcg.returnPrimitive();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "S" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -74,9 +84,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushShort((short) this.random.nextInt());
                 }
+
                 bcg.returnPrimitive();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "C" -> {
                 // Doesn't really know if it works but who uses chars anyway ?
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
@@ -85,9 +97,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushShort((short) (char) this.random.nextInt());
                 }
+
                 bcg.returnPrimitive();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "I" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -95,9 +109,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushInt(this.random.nextInt());
                 }
+
                 bcg.returnPrimitive();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "J" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -105,9 +121,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushLong(this.random.nextLong());
                 }
+
                 bcg.returnLong();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "D" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -115,9 +133,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushDouble(this.random.nextDouble());
                 }
+
                 bcg.returnDouble();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "F" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -125,9 +145,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushFloat(this.random.nextFloat());
                 }
+
                 bcg.returnFloat();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             case "Ljava/lang/String;" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 if (this.overrideReturn != null) {
@@ -135,9 +157,11 @@ public class MethodTerminator {
                 } else {
                     bcg.pushString(new UUID(this.random.nextLong(), this.random.nextLong()).toString());
                 }
+
                 bcg.returnObject();
                 this.codeAttribute.field2.override(bcg.toArray());
             }
+
             default -> throw new UnsupportedOperationException("Method terminator do not supports " + this.returnType + " return type yet!");
         }
     }

@@ -26,6 +26,7 @@ public class AgentLauncher {
                 if (vm != null) {
                     vm.detach();
                 }
+
                 System.out.println("Attachment successful!");
             }
         }

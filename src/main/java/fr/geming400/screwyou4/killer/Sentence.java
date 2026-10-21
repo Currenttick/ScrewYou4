@@ -7,8 +7,14 @@ import net.minecraft.util.RandomSource;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public record Sentence(RandomSource random, boolean shouldTryAnother, Optional<Infos.MethodInfo> methodInfo, Optional<ClassRepresentation> representation, Optional<Consumer<byte[]>> bufferEater, Optional<String> overrideTerminator) {
-
+public record Sentence(
+        RandomSource random,
+        boolean shouldTryAnother,
+        Optional<Infos.MethodInfo> methodInfo,
+        Optional<ClassRepresentation> representation,
+        Optional<Consumer<byte[]>> bufferEater,
+        Optional<String> overrideTerminator
+) {
     public Sentence(RandomSource random, boolean shouldTryAnother) {
         this(random, shouldTryAnother, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     }
