@@ -24,11 +24,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClassJudger implements ClassFileTransformer {
+    private static final boolean POST_MORTEM_PROPERTY = Boolean.parseBoolean(System.getProperty("SCREWYOU4_POST_MORTEM", "false"));
+    private static final boolean VERBOSE_PROPERTY = Boolean.parseBoolean(System.getProperty("SCREWYOU4_VERBOSE", "false"));
 
-    public static final boolean VERBOSE = false;
-    public static final boolean NOTIFY_PLAYER = true;
-    private static final boolean POST_MORTEM_PROPERTY = Boolean.parseBoolean(System.getProperty("POST_MORTEM", "false"));
+    public static final boolean VERBOSE = FabricLoader.getInstance().isDevelopmentEnvironment() || VERBOSE_PROPERTY;
     public static final boolean POST_MORTEM = FabricLoader.getInstance().isDevelopmentEnvironment() || POST_MORTEM_PROPERTY;
+    public static final boolean NOTIFY_PLAYERS = Boolean.parseBoolean(System.getProperty("SCREWYOU4_NOTIFY_PLAYERS", "true"));
+
     public static FileOutputStream logFileStream = null;
 
     public static FileOutputStream getLogFileStream() {
@@ -155,7 +157,7 @@ public class ClassJudger implements ClassFileTransformer {
                 : "SERVER";
 
         ScrewYou4.LOGGER.info("Killed method {} in {} ({})", method.getName(), clazz, envName);
-        if (NOTIFY_PLAYER) {
+        if (NOTIFY_PLAYERS) {
             String name = clazz.getSimpleName();
             if (name.isEmpty()) {
                 name = clazz.getName();
