@@ -64,6 +64,7 @@ public class ScrewOverCommand {
                                                     false,
                                                     Optional.of(method),
                                                     Optional.of(method.constantPool.classRepresentation),
+                                                    Optional.empty(),
                                                     Optional.empty()
                                             ), clazz);
                                             ex.ifPresent(e -> context.getSource().sendFailure(Component.literal("Error while killing " + clazz.getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage())));

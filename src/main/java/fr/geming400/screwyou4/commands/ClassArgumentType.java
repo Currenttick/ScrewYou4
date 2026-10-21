@@ -12,7 +12,6 @@ import fr.geming400.screwyou4.killer.ClassExecutioner;
 import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
 public class ClassArgumentType implements ArgumentType<Class<?>> {
@@ -26,7 +25,7 @@ public class ClassArgumentType implements ArgumentType<Class<?>> {
         String className = strings[0];
         try {
             return Arrays.stream(ClassExecutioner.getLoadedClasses()).filter(c -> c.getName().equals(className)).findFirst().orElseThrow();
-        } catch (NoSuchElementException e) {
+        } catch (Exception e) {
             throw new CommandSyntaxException(new ClassArgumentTypeSyntaxException(() -> "Class not found"), () -> "Class not found");
         }
     }

@@ -71,7 +71,7 @@ public class ClassJudger implements ClassFileTransformer {
                     ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
                     chosenMethod = infos.get(sentence.random().nextInt(infos.size()));
                 }
-                MethodTerminator terminator = new MethodTerminator(chosenMethod, sentence.random());
+                MethodTerminator terminator = new MethodTerminator(chosenMethod, sentence.random(), sentence.overrideTerminator().orElse(null));
                 terminator.terminate();
                 byte[] buffer = image2.toByteArray();
                 if (POST_MORTEM) {
