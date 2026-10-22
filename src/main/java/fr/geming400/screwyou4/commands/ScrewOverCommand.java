@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import fr.geming400.screwyou4.entrypoints.ScrewYou4;
+import fr.geming400.screwyou4.killer.AssignedSentence;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
 import fr.geming400.screwyou4.killer.Sentence;
 import fr.geming400.screwyou4.killer.parser.Infos;
@@ -49,14 +50,8 @@ public class ScrewOverCommand {
     private static void registerArguments() {
         ArgumentTypeRegistry.registerArgumentType(
                 ScrewYou4.id("class"),
-                ClassArgumentType.class,
-                SingletonArgumentInfo.contextFree(ClassArgumentType::new)
-        );
-
-        ArgumentTypeRegistry.registerArgumentType(
-                ScrewYou4.id("method"),
-                MethodArgumentType.class,
-                SingletonArgumentInfo.contextFree(MethodArgumentType::new)
+                SentenceArgumentType.class,
+                SingletonArgumentInfo.contextFree(SentenceArgumentType::new)
         );
     }
 
@@ -65,11 +60,8 @@ public class ScrewOverCommand {
                 Commands.literal("kill")
                         .then(Commands.argument("count", IntegerArgumentType.integer(0))
                                 .executes(ScrewOverCommand::serverKillRandomMethods))
-                        .then(Commands.literal("class")
-                                .then(Commands.argument("class_name", ClassArgumentType.clazz()).executes(ScrewOverCommand::serverKillSpecificClass)
-                                        .then(Commands.argument("method_name", MethodArgumentType.method())
-                                                .executes(ScrewOverCommand::serverKillSpecificMethod))
-                                )
+                        .then(Commands.literal("special")
+                                .then(Commands.argument("class_name", SentenceArgumentType.sentence()).executes(ScrewOverCommand::serverKillSpecificClass))
                         )
         );
     }
@@ -79,19 +71,19 @@ public class ScrewOverCommand {
                 ClientCommands.literal("kill")
                         .then(ClientCommands.argument("count", IntegerArgumentType.integer(0))
                                 .executes(ScrewOverCommand::clientKillRandomFunctions))
-                        .then(ClientCommands.literal("class")
-                                .then(ClientCommands.argument("class_name", ClassArgumentType.clazz()).executes(ScrewOverCommand::clientKillSpecificClass)
-                                        .then(ClientCommands.argument("method_name", MethodArgumentType.method())
-                                                .executes(ScrewOverCommand::clientKllSpecificMethod))
-                                )
+                        .then(ClientCommands.literal("special")
+                                .then(ClientCommands.argument("class_name", SentenceArgumentType.sentence()).executes(ScrewOverCommand::clientKillSpecificClass))
                         )
         );
     }
 
     private static int killRandomFunctions(int n, RandomSource random) {
-        for (int i = 0; i < n; i++)
-            ClassExecutioner.kill(Sentence.ofIterating(random));
-
+        // Peek optimisation
+        Thread.ofVirtual().start(() -> {
+                    for (int i = 0; i < n; i++) {
+                        ClassExecutioner.kill(Sentence.ofIterating(random));
+                    }
+        });
         return Command.SINGLE_SUCCESS;
     }
 
@@ -112,14 +104,31 @@ public class ScrewOverCommand {
     }
 
     private static int killSpecificClass(CommandContext<?> context, RandomSource random, Consumer<Component> onFailure) {
-        Class<?> clazz = ClassArgumentType.getClass(context, "class_name");
-        Optional<Exception> exception = ClassExecutioner.tryRetransform(new Sentence(random, false), clazz);
+        AssignedSentence assignedSentence = SentenceArgumentType.getSentence(context, "class_name");
+        if (assignedSentence.all()) {
+            Thread.ofVirtual().start(() -> {
+                for (Infos.MethodInfo info : assignedSentence.representation().getMethodInfos()) {
+                    Optional<Exception> exception = ClassExecutioner.tryRetransform(
+                            new Sentence(random, false, Optional.of(info),
+                                    Optional.of(assignedSentence.representation()), Optional.empty(),
+                                    Optional.empty()),
+                            assignedSentence.clazz()
+                    );
 
-        exception.ifPresent(e -> {
-            Component message = Component.literal("Error while killing " + clazz.getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage());
-            onFailure.accept(message);
-        });
+                    exception.ifPresent(e -> {
+                        Component message = Component.literal("Error while killing " + assignedSentence.getClass().getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage());
+                        onFailure.accept(message);
+                    });
+                }
+            });
+        } else {
+            Optional<Exception> exception = ClassExecutioner.tryRetransform(assignedSentence.getSentence(random), assignedSentence.clazz());
 
+            exception.ifPresent(e -> {
+                Component message = Component.literal("Error while killing " + assignedSentence.getClass().getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage());
+                onFailure.accept(message);
+            });
+        }
         return Command.SINGLE_SUCCESS;
     }
 
@@ -131,38 +140,5 @@ public class ScrewOverCommand {
     private static int clientKillSpecificClass(CommandContext<FabricClientCommandSource> context) {
         RandomSource random = Objects.requireNonNull(context.getSource().getPlayer()).getRandom().fork();
         return killSpecificClass(context, random, message -> context.getSource().sendError(message));
-    }
-
-
-
-    private static int killSpecificMethod(CommandContext<?> context, RandomSource random, Consumer<Component> onFailure) {
-        Class<?> clazz = ClassArgumentType.getClass(context, "class_name");
-        Infos.MethodInfo method = MethodArgumentType.getMethod(context, "method_name");
-
-        Optional<Exception> ex = ClassExecutioner.tryRetransform(new Sentence(
-                random,
-                false,
-                Optional.of(method),
-                Optional.of(method.constantPool.classRepresentation),
-                Optional.empty(),
-                Optional.empty()
-        ), clazz);
-
-        ex.ifPresent(e -> {
-            Component message = Component.literal("Error while killing " + clazz.getSimpleName() + ", " + e.getClass().getSimpleName() + " : " + e.getMessage());
-            onFailure.accept(message);
-        });
-
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int serverKillSpecificMethod(CommandContext<CommandSourceStack> context) {
-        RandomSource random = Objects.requireNonNull(context.getSource().getPlayer()).getRandom().fork();
-        return killSpecificMethod(context, random, message -> context.getSource().sendFailure(message));
-    }
-
-    private static int clientKllSpecificMethod(CommandContext<FabricClientCommandSource> context) {
-        RandomSource random = Objects.requireNonNull(context.getSource().getPlayer()).getRandom().fork();
-        return killSpecificMethod(context, random, message -> context.getSource().sendError(message));
     }
 }
