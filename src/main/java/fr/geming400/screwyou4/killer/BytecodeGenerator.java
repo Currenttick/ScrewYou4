@@ -5,6 +5,7 @@ import fr.geming400.screwyou4.killer.parser.Field;
 import fr.geming400.screwyou4.killer.parser.Infos;
 import fr.geming400.screwyou4.killer.parser.PoolEntry;
 
+import java.lang.classfile.Opcode;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -39,33 +40,33 @@ public class BytecodeGenerator {
     }
 
     public void returnVoid() {
-        this.bytes.add((byte) 0xB1);
+        this.bytes.add((byte) Opcode.RETURN.bytecode());
     }
 
     public void returnPrimitive() {
-        this.bytes.add((byte) 0xAC);
+        this.bytes.add((byte) Opcode.IRETURN.bytecode());
     }
 
     public void returnObject() {
-        this.bytes.add((byte) 0xB0);
+        this.bytes.add((byte) Opcode.ARETURN.bytecode());
     }
 
     public void returnLong() {
-        this.bytes.add((byte) 0xAD);
+        this.bytes.add((byte) Opcode.LRETURN.bytecode());
     }
 
     public void returnFloat() {
-        this.bytes.add((byte) 0xAE);
+        this.bytes.add((byte) Opcode.FRETURN.bytecode());
     }
 
     public void returnDouble() {
-        this.bytes.add((byte) 0xAF);
+        this.bytes.add((byte) Opcode.DRETURN.bytecode());
     }
 
     public void loadConstant(short index) {
         this.maxLocals++;
         this.maxStack++;
-        this.bytes.add((byte) 0x13);
+        this.bytes.add((byte) Opcode.LDC_W.bytecode());
         this.bytes.add((byte) (index >> 8));
         this.bytes.add((byte) index);
     }
@@ -75,7 +76,7 @@ public class BytecodeGenerator {
         this.maxStack++;
         this.maxLocals++;
         this.maxStack++;
-        this.bytes.add((byte) 0x14);
+        this.bytes.add((byte) Opcode.LDC2_W.bytecode());
         this.bytes.add((byte) (index >> 8));
         this.bytes.add((byte) index);
     }
@@ -83,14 +84,14 @@ public class BytecodeGenerator {
     public void pushByte(Byte b) {
         this.maxLocals++;
         this.maxStack++;
-        this.bytes.add((byte) 0x10);
+        this.bytes.add((byte) Opcode.BIPUSH.bytecode());
         this.bytes.add(b);
     }
 
     public void pushShort(short s) {
         this.maxLocals++;
         this.maxStack++;
-        this.bytes.add((byte) 0x11);
+        this.bytes.add((byte) Opcode.SIPUSH.bytecode());
         this.bytes.add((byte) (s >> 8));
         this.bytes.add((byte) s);
     }
