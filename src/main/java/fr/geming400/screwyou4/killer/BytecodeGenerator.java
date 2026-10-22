@@ -124,6 +124,12 @@ public class BytecodeGenerator {
         this.loadLongConstant(index);
     }
 
+    public void pushNull() {
+        this.maxLocals++;
+        this.maxStack++;
+        this.bytes.add((byte) Opcode.ACONST_NULL.bytecode());
+    }
+
     public void pushString(String string) {
         this.maxLocals++;
         this.maxStack++;
