@@ -1,6 +1,6 @@
 package fr.geming400.screwyou4.agent;
 
-import fr.geming400.screwyou4.ScrewYou4;
+import fr.geming400.screwyou4.entrypoints.ScrewYou4;
 import fr.geming400.screwyou4.killer.AgentLauncher;
 import fr.geming400.screwyou4.killer.ClassExecutioner;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
@@ -54,15 +54,17 @@ public class Agent {
     @SuppressWarnings("unused")
     public static void launch() {
         long pid = ProcessHandle.current().pid();
-        Class<AgentLauncher> clazz = AgentLauncher.class;
-        String rawClassName = clazz.getCanonicalName();
+
+        String rawClassName = AgentLauncher.class.getCanonicalName();
         String className = LoaderUtil.getClassFileName(rawClassName);
         InputStream stream = ClassExecutioner.class.getClassLoader().getResourceAsStream(className);
+
         String fileName = Arrays.stream(Objects.requireNonNull(FabricLoaderImpl.INSTANCE.getModsDirectory().list()))
                 .filter(name -> name.contains("screw") && name.contains("you"))
                 .findFirst()
                 .map(name -> "mods/" + name)
                 .orElse(MOD_PATH);
+
         ScrewYou4.LOGGER.info("found mod's jar : {}", fileName);
         Thread t = new Thread(() -> {
             try {
@@ -70,20 +72,24 @@ public class Agent {
                 File subFolder = new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "fr");
                 FileUtils.deleteDirectory(subFolder);
                 File folder = new File(FabricLoaderImpl.INSTANCE.getGameDir().toString() + "/" + className);
-                if (!folder.getParentFile().mkdirs()) {
+
+                if (!folder.getParentFile().mkdirs())
                     throw new RuntimeException("Could not create folder " + folder.getParentFile().getAbsolutePath());
-                }
+
                 Files.copy(
                         stream,
                         folder.toPath(),
                         StandardCopyOption.REPLACE_EXISTING
                 );
+
                 stream.close();
                 runningAgent = new ProcessBuilder("java", "-cp", ".", rawClassName.replace('/', '.'), String.valueOf(pid), fileName)
                         .directory(FabricLoaderImpl.INSTANCE.getGameDir().toFile())
                         .inheritIO()
                         .start();
+
                 runningAgent.waitFor();
+
                 ScrewYou4.LOGGER.info("Finished attaching");
                 runningAgent = null;
             } catch (IOException | InterruptedException e) {
@@ -91,6 +97,7 @@ public class Agent {
             }
         });
 
+        t.setName("AgentLauncher replicator");
         t.start();
         //noinspection LoopConditionNotUpdatedInsideLoop
         while (t.isAlive()) {

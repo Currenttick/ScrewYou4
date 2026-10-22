@@ -26,22 +26,31 @@ public class ClassRepresentation implements ClassWriteable {
         }
         this.minorVersion = new Field.ShortField(data);
         log("version minor : " + this.minorVersion.value);
+
         this.majorVersion = new Field.ShortField(data);
         log("version major : " + this.majorVersion.value);
+
         this.constantPool = new ConstantPool(data, this);
         log(this.constantPool.toString());
+
         this.accessFlags = new Field.ShortField(data);
         log("access flags : " + this.accessFlags.value);
+
         this.thisClass = new Field.ConstantPoolReferenceField(data);
         log(this.thisClass.format("this class : ", this.constantPool));
+
         this.superClass = new Field.ConstantPoolReferenceField(data);
         log(this.superClass.format("super class : ", this.constantPool));
+
         this.interfaces = new Field.ShortPrefixedArrayField<>(data, Field.ConstantPoolReferenceField::new);
         log(this.interfaces.format("interfaces size : ", this.constantPool));
+
         this.fields = new Field.ShortPrefixedArrayField<>(data, b -> new Infos.FieldInfo(b, this.constantPool));
         log(this.fields.format("fields size : ", this.constantPool));
+
         this.methods = new Field.ShortPrefixedArrayField<>(data, b -> new Infos.MethodInfo(b, this.constantPool));
         log(this.methods.format("methods size : ", this.constantPool));
+
         this.attributes = new Field.ShortPrefixedArrayField<>(data, (ByteBuffer buffer) -> new Attribute(buffer, this.constantPool));
         log(this.attributes.format("attributes size : ", this.constantPool));
         log("========== SUCCESS!! ==========");

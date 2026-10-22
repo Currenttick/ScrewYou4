@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 
 public abstract class Infos implements ClassWriteable {
 
-    public static class FieldInfo extends Field.FieldElement4<Field.ShortField, Field.ConstantPoolReferenceField, Field.ConstantPoolReferenceField, Field.ShortPrefixedArrayField<Attribute>> {
+    public static class FieldInfo
+            extends Field.FieldElement4<Field.ShortField, Field.ConstantPoolReferenceField, Field.ConstantPoolReferenceField, Field.ShortPrefixedArrayField<Attribute>> {
 
         public final ConstantPool constantPool;
 
@@ -44,7 +45,8 @@ public abstract class Infos implements ClassWriteable {
         }
     }
 
-    public static class MethodInfo extends Field.FieldElement4<Field.ShortField, Field.ConstantPoolReferenceField, Field.ConstantPoolReferenceField, Field.ShortPrefixedArrayField<Attribute>> {
+    public static class MethodInfo
+            extends Field.FieldElement4<Field.ShortField, Field.ConstantPoolReferenceField, Field.ConstantPoolReferenceField, Field.ShortPrefixedArrayField<Attribute>> {
 
         public final ConstantPool constantPool;
 

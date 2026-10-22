@@ -11,26 +11,31 @@ public class BytecodeUtils {
                 inParameterType = false;
                 inArray = false;
             }
+
             if (c == '[') {
                 inArray = true;
                 continue;
             }
+
             if (inParameterType) {
                 continue;
             }
+
             if ("BCDFIJSZ".contains(String.valueOf(c))) {
                 parametersSize++;
                 if (longDoubleAdd && !inArray && (c == 'D' || c == 'J')) {
                     parametersSize++;
                 }
+
                 inArray = false;
             }
+
             if (c == 'L') {
                 parametersSize++;
                 inParameterType = true;
             }
         }
+
         return parametersSize;
     }
-
 }

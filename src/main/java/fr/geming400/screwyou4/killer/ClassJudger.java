@@ -1,10 +1,14 @@
 package fr.geming400.screwyou4.killer;
 
-import fr.geming400.screwyou4.ScrewYou4;
+import fr.geming400.screwyou4.entrypoints.ScrewYou4;
 import fr.geming400.screwyou4.Utils;
 import fr.geming400.screwyou4.killer.parser.ClassRepresentation;
 import fr.geming400.screwyou4.killer.parser.Infos;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,10 +24,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClassJudger implements ClassFileTransformer {
+    private static final boolean POST_MORTEM_PROPERTY = Boolean.parseBoolean(System.getProperty("SCREWYOU4_POST_MORTEM", "false"));
 
-    public static final boolean VERBOSE = false;
-    public static final boolean NOTIFY_PLAYER = true;
-    public static final boolean POST_MORTEM = true;
+    public static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("SCREWYOU4_VERBOSE", "false"));
+    public static final boolean POST_MORTEM = FabricLoader.getInstance().isDevelopmentEnvironment() || POST_MORTEM_PROPERTY;
+    public static final boolean NOTIFY_PLAYERS = Boolean.parseBoolean(System.getProperty("SCREWYOU4_NOTIFY_PLAYERS", "true"));
+
     public static FileOutputStream logFileStream = null;
 
     public static FileOutputStream getLogFileStream() {
@@ -62,8 +68,12 @@ public class ClassJudger implements ClassFileTransformer {
                 sentence.bufferEater().get().accept(classfileBuffer);
                 return null;
             }
+
             try {
-                ClassRepresentation image2 = sentence.representation().isPresent() ? sentence.representation().get() : new ClassRepresentation(classfileBuffer);
+                ClassRepresentation image2 = sentence.representation().isPresent()
+                        ? sentence.representation().get()
+                        : new ClassRepresentation(classfileBuffer);
+
                 final Infos.MethodInfo chosenMethod;
                 if (sentence.methodInfo().isPresent()) {
                     chosenMethod = sentence.methodInfo().get();
@@ -71,6 +81,7 @@ public class ClassJudger implements ClassFileTransformer {
                     ArrayList<Infos.MethodInfo> infos = image2.getMethodInfos();
                     chosenMethod = infos.get(sentence.random().nextInt(infos.size()));
                 }
+
                 MethodTerminator terminator = new MethodTerminator(chosenMethod, sentence.random(), sentence.overrideTerminator().orElse(null));
                 terminator.terminate();
                 byte[] buffer = image2.toByteArray();
@@ -80,12 +91,14 @@ public class ClassJudger implements ClassFileTransformer {
                             classfileBuffer,
                             StandardOpenOption.CREATE
                     );
+
                     Files.write(
                             new File(FabricLoaderImpl.INSTANCE.getGameDir().toFile(), "produced.class").toPath(),
                             buffer,
                             StandardOpenOption.CREATE
                     );
                 }
+
                 notifyKilled(classBeingRedefined, chosenMethod);
                 return buffer;
             } catch (Exception e) {
@@ -98,12 +111,12 @@ public class ClassJudger implements ClassFileTransformer {
                                             || (e instanceof IllegalArgumentException && e.getMessage().contains("Code attribute"))
                             )
                     ) {
-                        Utils.tellRaw("\"Failed to transform class : " + e + "\"");
-                        ScrewYou4.LOGGER.warn("Failed to transform class {} : {}", className, e.getMessage());
+                        Utils.sendMessageToAllPlayers(Component.literal("\"Failed to transform class : " + e + "\""));
+                        ScrewYou4.LOGGER.error("Failed to transform class" + className, e);
                     }
                 } else {
-                    Utils.tellRaw("\"Failed to transform class : " + e + "\"");
-                    ScrewYou4.LOGGER.warn("Failed to transform class {} : {}", className, e.getMessage());
+                    Utils.sendMessageToAllPlayers(Component.literal("\"Failed to transform class : " + e + "\""));
+                    ScrewYou4.LOGGER.error("Failed to transform class" + className, e);
                 }
             }
         }
@@ -139,14 +152,23 @@ public class ClassJudger implements ClassFileTransformer {
     }
 
     public static void notifyKilled(Class<?> clazz, Infos.MethodInfo method) {
-        ScrewYou4.LOGGER.info("Killed method {} in {} (CLIENT)", method.getName(), clazz);
-        if (NOTIFY_PLAYER) {
+        String envName = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT
+                ? "CLIENT"
+                : "SERVER";
+
+        ScrewYou4.LOGGER.info("Killed method {} in {} ({})", method.getName(), clazz, envName);
+        if (NOTIFY_PLAYERS) {
             String name = clazz.getSimpleName();
             if (name.isEmpty()) {
                 name = clazz.getName();
             }
 
-            Utils.tellRaw("[{text:Killed},{text:\" " + name + "." + method.getShortName() + "(...)\",color:red}]");
+            String displayedMethodName = "%s.%s(...)".formatted(name, method.getShortName());
+
+            Utils.sendMessageToAllPlayers(
+                    Component.literal("Killed ")
+                            .append(Component.literal(displayedMethodName).withColor(TextColor.RED))
+            );
         }
     }
 
