@@ -39,7 +39,7 @@ public class ScrewOverCommand {
                 }
         );
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, commandBuildContext) -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, _) -> {
             LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommands.literal("screw-client");
             registerClientKillCommand(builder);
 
@@ -60,10 +60,13 @@ public class ScrewOverCommand {
                 Commands.literal("kill")
                         .then(Commands.argument("count", IntegerArgumentType.integer(0))
                                 .executes(ScrewOverCommand::serverKillRandomMethods))
-                        .then(Commands.literal("special")
+                        .then(Commands.literal("class")
                                 .then(Commands.argument("class_name", SentenceArgumentType.sentence()).executes(ScrewOverCommand::serverKillSpecificClass))
                         )
-        );
+        ).then(Commands.literal("help").executes(context -> {
+            context.getSource().sendSuccess(() -> Component.literal("/screw kill <nb classes to target>\n/screw kill class name.of.the.class#nameOfTheMethod=return_override"), false);
+            return Command.SINGLE_SUCCESS;
+        }));
     }
 
     public static void registerClientKillCommand(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
@@ -71,10 +74,13 @@ public class ScrewOverCommand {
                 ClientCommands.literal("kill")
                         .then(ClientCommands.argument("count", IntegerArgumentType.integer(0))
                                 .executes(ScrewOverCommand::clientKillRandomFunctions))
-                        .then(ClientCommands.literal("special")
+                        .then(ClientCommands.literal("class")
                                 .then(ClientCommands.argument("class_name", SentenceArgumentType.sentence()).executes(ScrewOverCommand::clientKillSpecificClass))
                         )
-        );
+        ).then(ClientCommands.literal("help").executes(context -> {
+            context.getSource().sendFeedback(Component.literal("/screw-client kill <nb classes to target>\n/screw-client kill class name.of.the.class#nameOfTheMethod=return_override"));
+            return Command.SINGLE_SUCCESS;
+        }));
     }
 
     private static int killRandomFunctions(int n, RandomSource random) {
