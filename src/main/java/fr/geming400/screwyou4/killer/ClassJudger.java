@@ -25,9 +25,8 @@ import java.util.HashMap;
 
 public class ClassJudger implements ClassFileTransformer {
     private static final boolean POST_MORTEM_PROPERTY = Boolean.parseBoolean(System.getProperty("SCREWYOU4_POST_MORTEM", "false"));
-    private static final boolean VERBOSE_PROPERTY = Boolean.parseBoolean(System.getProperty("SCREWYOU4_VERBOSE", "false"));
 
-    public static final boolean VERBOSE = FabricLoader.getInstance().isDevelopmentEnvironment() || VERBOSE_PROPERTY;
+    public static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("SCREWYOU4_VERBOSE", "false"));
     public static final boolean POST_MORTEM = FabricLoader.getInstance().isDevelopmentEnvironment() || POST_MORTEM_PROPERTY;
     public static final boolean NOTIFY_PLAYERS = Boolean.parseBoolean(System.getProperty("SCREWYOU4_NOTIFY_PLAYERS", "true"));
 
