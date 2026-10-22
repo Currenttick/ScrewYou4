@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 
 final class ClientUtils {
+
     private ClientUtils() {}
 
     @Environment(EnvType.CLIENT)

@@ -12,7 +12,6 @@ public class MethodTerminator {
     private final Infos.MethodInfo method;
     private final Attribute codeAttribute;
     private final RandomSource random;
-    private final String returnType;
     private final String overrideReturn;
 
     public MethodTerminator(Infos.MethodInfo method, RandomSource random, String overrideReturn) {
@@ -35,8 +34,6 @@ public class MethodTerminator {
         }
 
         this.codeAttribute = codeAttr;
-        String desc = this.method.getDesc();
-        this.returnType = desc.substring(desc.indexOf(")") + 1);
         this.overrideReturn = overrideReturn;
     }
 
@@ -45,7 +42,7 @@ public class MethodTerminator {
 //            throw new UnsupportedOperationException("Method terminator do not supports return type: " + this.returnType);
 //        }
 
-        switch (this.returnType) {
+        switch (this.method.getReturnType()) {
             case "V" -> {
                 BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
                 bcg.returnVoid();
@@ -162,7 +159,16 @@ public class MethodTerminator {
                 this.codeAttribute.field2.override(bcg.toArray());
             }
 
-            default -> throw new UnsupportedOperationException("Method terminator do not supports " + this.returnType + " return type yet!");
+            default -> {
+                if ("null".equals(this.overrideReturn)) {
+                    BytecodeGenerator bcg = new BytecodeGenerator(this.method, this.method.constantPool);
+                    bcg.pushNull();
+                    bcg.returnObject();
+                    this.codeAttribute.field2.override(bcg.toArray());
+                    return;
+                }
+                throw new UnsupportedOperationException("Method terminator do not supports " + this.method.getReturnType() + " return type yet!");
+            }
         }
     }
 }

@@ -92,5 +92,10 @@ public abstract class Infos implements ClassWriteable {
         public String getDesc() {
             return this.field3.<PoolEntry.Utf8PoolEntry>getExpected(this.constantPool).field.getValue();
         }
+
+        public String getReturnType() {
+            String desc = this.getDesc();
+            return desc.substring(desc.indexOf(")") + 1);
+        }
     }
 }
